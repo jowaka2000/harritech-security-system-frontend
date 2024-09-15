@@ -2,8 +2,9 @@ import { SecuritySystemsContextProvider } from "./contexts/SecuritySystemsContex
 import AppLayout from "./layouts/AppLayout";
 import Index from "./views/home/Index";
 import ShowSystems from "./views/home/ShowSystems";
+import AboutUs from "./views/info/AboutUs";
 
-const { createBrowserRouter } = require("react-router-dom");
+const { createBrowserRouter, Navigate } = require("react-router-dom");
 
 const router = createBrowserRouter([
   {
@@ -22,7 +23,15 @@ const router = createBrowserRouter([
         path: "/security-systems/:system",
         element: <ShowSystems />,
       },
+      {
+        path:"/info/about-us",
+        element:<AboutUs />
+      }
     ],
+  },
+  {
+    path:'*',
+    element:<Navigate  to='/' /> 
   },
 ]);
 

@@ -1,4 +1,4 @@
-import electricFence from '../assets/system-images/fence3.jpeg';
+import electricFence from "../assets/system-images/fence3.jpeg";
 
 const ServiceDescription = {
   "Ip Cameras": {
@@ -183,12 +183,46 @@ const ServiceDescription = {
     ],
   },
 
-  "": {
-    name: "",
-    shortDescription: "",
-    image: "url",
-    fullDescription: "",
-    systemFunctions: ["", "", ""],
+  "CCTV Installation Guide": {
+    name: "CCTV Installation Guide",
+    shortDescription:
+      "Comprehensive guidance on installing CCTV systems for optimal coverage and security.",
+    image: { url: "", alt: "" },
+    fullDescription:
+      "Our CCTV installation guide helps clients understand the best practices for placing and setting up security cameras. From choosing the right camera locations to wiring and connecting to DVRs or NVRs, we provide step-by-step instructions that ensure your system is installed for maximum efficiency and coverage. Whether you're setting up a home or business security system, this guide simplifies the installation process.",
+    systemFunctions: [
+      "Step-by-step guidance on camera placement and installation.",
+      "Helps ensure optimal coverage and system functionality.",
+      "Suitable for both DIY enthusiasts and professional installers.",
+    ],
+  },
+
+  "Home Security Systems Setup": {
+    name: "Home Security Systems Setup",
+    shortDescription:
+      "Step-by-step advice on setting up an integrated home security system for ultimate protection.",
+    image: { url: "", alt: "" },
+    fullDescription:
+      "Setting up a home security system involves more than just installing cameras. Our guide covers the complete process, from installing alarms and motion sensors to integrating smart home devices like door locks and lighting. We help you design a comprehensive security plan that fits your unique needs, ensuring your home is fully protected against any threats.",
+    systemFunctions: [
+      "Detailed instructions for installing alarms, sensors, and smart devices.",
+      "Helps you design a complete home security system.",
+      "Perfect for homeowners looking to enhance safety.",
+    ],
+  },
+
+  "Security Consultancy": {
+    name: "Security Consultancy",
+    shortDescription:
+      "Professional consultancy services to design and optimize your security system.",
+    image: { url: "", alt: "" },
+    fullDescription:
+      "Our security consultancy services are designed to help businesses and individuals create customized security plans tailored to their specific needs. We provide expert advice on the best systems, installation practices, and ongoing maintenance to ensure your security is always at its peak. Whether you're securing a home, business, or large industrial site, we offer the guidance you need for peace of mind.",
+    systemFunctions: [
+      "Professional consultancy for personalized security solutions.",
+      "Expert advice on system selection and installation.",
+      "Ideal for residential, commercial, or industrial security planning.",
+    ],
   },
 };
 

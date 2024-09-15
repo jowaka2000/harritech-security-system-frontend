@@ -658,8 +658,11 @@ const HomeNavBar = () => {
 
             <section className="w-full">
               <Link
-                to="/about-us"
-                onClick={() => setIsAboutUs(!isAboutUs)}
+                to="/info/about-us"
+                onClick={() => {
+                  setIsSideBar(false);
+                  setActiveUrlName("About Us");
+                }}
                 className={`flex justify-between w-full px-4 py-3  border-b border-gray-300 ${
                   isAboutUs ? "text-gray-800 bg-white" : "text-gray-100"
                 }`}
