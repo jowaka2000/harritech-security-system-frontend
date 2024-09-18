@@ -9,20 +9,21 @@ const ShowSystems = () => {
   const [currentSystemFunction, setCurrentSystemFunction] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  
   useEffect(() => {
     setCurrentSystem(ServiceDescription[params.system]);
     setIsLoading(false);
   }, [params.system]);
 
   useEffect(() => {
-    if(currentSystem!==undefined){
+    if (currentSystem !== undefined) {
       setCurrentSystemFunction(currentSystem.systemFunctions);
     }
   }, [currentSystem]);
 
   return (
     <div className="space-y-8">
-      <section  className="flex w-full bg-pink-700 h-52 text-white rounded-br-full items-center   justify-center">
+      <section className="flex w-full bg-pink-700 h-52 text-white rounded-br-full items-center   justify-center">
         <div className="font-serif">
           <h1 className="flex justify-center text-3xl font-black w-11/12 text-center">
             {params.system}
@@ -36,8 +37,7 @@ const ShowSystems = () => {
         </section>
       )}
 
-
-      {(!isLoading && currentSystem!==undefined) && (
+      {!isLoading && currentSystem !== undefined && (
         <section className="py-2 font-serif space-y-5 text-slate-800">
           <article className="space-y-1 px-2">
             <h1 className="font-black  text-lg ">{currentSystem.name}</h1>
@@ -48,7 +48,9 @@ const ShowSystems = () => {
 
           <article className="py-4">
             <img src={currentSystem.image.url} alt={currentSystem.image.alt} />
-            <small className="text-xs italic text-gray-800 flex px-1">{currentSystem.image.alt}</small>
+            <small className="text-xs italic text-gray-800 flex px-1">
+              {currentSystem.image.alt}
+            </small>
           </article>
 
           <p className="text-medium indent-10 bg-gradient-to-r from-pink-200 to-pink-400 rounded-tr-full rounded-bl-full bg-opacity-[0.2] px-2">
