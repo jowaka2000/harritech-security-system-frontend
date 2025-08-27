@@ -330,11 +330,17 @@ const HomeNavBar = () => {
         </article>
 
         {/* Right: Phone + Profile Menu */}
-        <article className="hidden lg:flex items-center gap-6">
+        <article className="hidden lg:flex items-center gap-4">
           {/* Phone Number */}
-          <span className="font-semibold text-pink-700 text-base tracking-wide">
-            0796802258
-          </span>
+          <div className="flex items-center space-x-2 px-2 py-1 rounded-md bg-pink-50 shadow-sm w-fit">
+            <FaPhoneAlt className="text-pink-700 text-sm" />
+            <a
+              href="tel:+254796802258"
+              className="font-semibold text-pink-700  tracking-wide"
+            >
+              0796 802 258
+            </a>
+          </div>
 
           {/* If not logged in, show Login button */}
           {!token && (

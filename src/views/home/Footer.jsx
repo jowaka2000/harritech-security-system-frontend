@@ -108,7 +108,7 @@ const Footer = () => {
           Reserved.
         </p>
         <p className="text-xs text-gray-300">
-          Developed by <span className="font-bold">John Kimemia</span>
+          Developed by <a href="https://github.com/jowaka2000" className="font-bold">John Kimemia</a>
         </p>
       </div>
     </footer>
