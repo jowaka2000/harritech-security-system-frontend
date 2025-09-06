@@ -1,11 +1,13 @@
-import electricFence from "../assets/system-images/fence3.jpeg";
 
 const ServiceDescription = {
   "Ip Cameras": {
     name: "IP Cameras Installation",
+    type:'cameras',
     shortDescription:
       "HARRITECH installs IP cameras that deliver high-resolution surveillance with secure remote access from any internet-connected device.",
-    image: { url: "", alt: "" },
+    front_image: "",
+    top_image: "",
+    intermediate_image: "",
     fullDescription:
       "Internet Protocol (IP) cameras are advanced security systems designed for real-time video surveillance over a network. These cameras provide crystal-clear footage, often in HD or higher resolutions, and allow users to access live or recorded video remotely through mobile apps or web platforms. They are equipped with motion detection, night vision, and sometimes even AI-driven analytics like facial recognition. Perfect for both residential and commercial use, IP cameras ensure constant monitoring, giving you peace of mind even when you're away.",
     systemFunctions: [
@@ -36,9 +38,12 @@ const ServiceDescription = {
 
   "Dvrs And Nvrs": {
     name: "DVRs and NVRs Installation",
+    type:'cameras',
     shortDescription:
       "DVRs and NVRs form the core of reliable video recording, ensuring continuous capture and easy playback of surveillance footage.",
-    image: { url: "", alt: "" },
+    front_image: "",
+    top_image: "",
+    intermediate_image: "",
     fullDescription:
       "Digital Video Recorders (DVRs) and Network Video Recorders (NVRs) are vital components of modern surveillance systems. DVRs connect to analogue cameras, converting and storing their footage digitally, while NVRs record video directly from IP cameras over a network. Both systems provide 24/7 recording, playback, and storage options, with support for multiple channels to handle several cameras simultaneously. They allow users to review historical footage locally or remotely, making them a dependable choice for both residential and enterprise security solutions.",
     systemFunctions: [
@@ -69,9 +74,12 @@ const ServiceDescription = {
 
   "Analogue Hd Cameras": {
     name: "Analogue HD Cameras Installation",
+    type:'cameras',
     shortDescription:
       "High-definition analogue cameras provide reliable, cost-effective surveillance with easy integration into existing CCTV setups.",
-    image: { url: "", alt: "" },
+    front_image: "",
+    top_image: "",
+    intermediate_image: "",
     fullDescription:
       "Analogue HD cameras combine the traditional reliability of CCTV with modern high-definition video quality. These cameras are ideal for upgrading existing analogue infrastructure without replacing cabling, making them a cost-efficient solution for improved surveillance. They deliver clear images, often up to 1080p or higher, and include features such as night vision, motion detection, and weather resistance for outdoor use. Their affordability and straightforward setup make them suitable for both residential and commercial applications.",
     systemFunctions: [
@@ -102,6 +110,7 @@ const ServiceDescription = {
 
   "Vehicle Dvrs": {
     name: "Vehicle DVRs Installation",
+    type:'cameras',
     shortDescription:
       "Vehicle DVRs record every journey, enhancing safety, accountability, and protection for drivers and fleets.",
     image: { url: "", alt: "" },
@@ -136,6 +145,7 @@ const ServiceDescription = {
 
   "Vehicle Cameras": {
     name: "Vehicle Cameras Installation",
+    type:'cameras',
     shortDescription:
       "High-quality vehicle cameras deliver reliable video coverage for both private cars and commercial fleets.",
     image: { url: "", alt: "" },
@@ -167,8 +177,12 @@ const ServiceDescription = {
     ],
   },
 
+
+
+  
   "Access Control": {
     name: "Biometric Access Control",
+    type:'biometric',
     shortDescription:
       "Biometric access control systems provide secure, personalized entry to buildings and sensitive areas.",
     image: { url: "", alt: "" },
@@ -203,6 +217,7 @@ const ServiceDescription = {
 
   "Attendance Systems": {
     name: "Attendance Systems Installation",
+    type:'biometric',
     shortDescription:
       "Biometric attendance systems track employee presence with unmatched accuracy and accountability.",
     image: { url: "", alt: "" },
@@ -237,6 +252,7 @@ const ServiceDescription = {
 
   "Software And Solutions": {
     name: "Software and Solutions",
+    type:'biometric',
     shortDescription:
       "Customized biometric software solutions that integrate seamlessly with your security infrastructure.",
     image: { url: "", alt: "" },
@@ -268,8 +284,12 @@ const ServiceDescription = {
     ],
   },
 
+
+
+
   "Electric Fence": {
     name: "Electric Fence Installation",
+    type:'perimeter',
     shortDescription:
       "Electric fences provide an extra layer of defense to secure your property from intruders.",
     image: { url: "electricFence", alt: "Electric Fence" },
@@ -303,6 +323,7 @@ const ServiceDescription = {
 
   "Automatic Gates": {
     name: "Automatic Gates Installation",
+    type:'perimeter',
     shortDescription:
       "Automatic gates enhance property security while offering convenience through controlled access.",
     image: { url: "", alt: "" },
@@ -335,6 +356,7 @@ const ServiceDescription = {
 
   "Intruder Alarm Systems": {
     name: "Intruder Alarm Systems Installation",
+    type:'alarm',
     shortDescription:
       "Advanced intruder alarms detect and alert against unauthorized access, keeping your property secure.",
     image: { url: "", alt: "" },
@@ -367,6 +389,7 @@ const ServiceDescription = {
 
   "Fire Alarm Systems": {
     name: "Fire Alarm System Installation",
+    type:'alarm',
     shortDescription:
       "Protect your property from fire hazards with fast-response fire alarm systems.",
     image: { url: "", alt: "" },
@@ -401,6 +424,7 @@ const ServiceDescription = {
 
   "Fire Doors": {
     name: "Fire Doors Installation",
+    type:'alarm',
     shortDescription:
       "Certified fire doors contain fire spread and ensure safe evacuation during emergencies.",
     image: { url: "", alt: "" },
@@ -432,8 +456,10 @@ const ServiceDescription = {
       "Hotels & commercial complexes — improve fire safety compliance and guest protection.",
     ],
   },
+
   "Cctv Installation Guide": {
     name: "CCTV Installation Guide",
+    type:'guidance',
     shortDescription:
       "Comprehensive guidance on installing CCTV systems for optimal coverage and security.",
     image: { url: "", alt: "" },
@@ -466,6 +492,7 @@ const ServiceDescription = {
 
   "Home Security Systems Setup": {
     name: "Home Security Systems Setup",
+    type:'guidance',
     shortDescription:
       "Step-by-step advice on setting up an integrated home security system for ultimate protection.",
     image: { url: "", alt: "" },
@@ -498,6 +525,7 @@ const ServiceDescription = {
 
   "Security Consultancy": {
     name: "Security Consultancy",
+    type:'guidance',
     shortDescription:
       "Professional consultancy services to design and optimize your security system.",
     image: { url: "", alt: "" },

@@ -1,6 +1,7 @@
 import { SecuritySystemsContextProvider } from "./contexts/SecuritySystemsContextProvider";
 import AppLayout from "./layouts/AppLayout";
 import AuthLayout from "./layouts/AuthLayout";
+import Admin from "./views/admin/Admin";
 import Login from "./views/auth/Login";
 import Register from "./views/auth/Register";
 import CreatePosts from "./views/home/CreatePosts";
@@ -23,8 +24,13 @@ const router = createBrowserRouter([
         path: "/",
         element: <Index />,
       },
+    
+       {
+        path: "/admin",
+        element: <Admin />,
+      },
       {
-        path: "/security-systems/:system",
+        path: "/security-systems/:public_id",
         element: <ShowSystems />,
       },
       {
