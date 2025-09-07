@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
 import axiosClient from "../../axiosClient";
 import { FaPhoneAlt, FaBars, FaTimes } from "react-icons/fa";
-
+import { useSecuritySystemsContextProvider } from "../../contexts/SecuritySystemsContextProvider";
 const HomeNavBar = () => {
   const [isSideBar, setIsSideBar] = useState(false);
 
-  const { token, setToken, setUser } = useAuthContextProvider();
+  const { token, setToken, setUser, user } = useAuthContextProvider();
 
   const [activeUrlName, setActiveUrlName] = useState("Home");
 
@@ -31,144 +31,25 @@ const HomeNavBar = () => {
   const [openProductId, setOpenProductId] = useState(null); // which product submenu is open
   const location = useLocation(); // gives current URL
   const currentPath = decodeURIComponent(location.pathname);
-
-  const slugify = (name) => {
-    return name.toLowerCase().replace(/\s+/g, "-");
-  };
-
-  const productsAndSolutions = [
-    {
-      id: 1,
-      name: "Cameras",
-      elements: [
-        {
-          id: 1,
-          url: slugify("/security-systems/Ip Cameras"),
-          name: "IP Cameras",
-        },
-        {
-          id: 2,
-          url: slugify("/security-systems/DVRs and NVRs"),
-          name: "DVRs and NVRs",
-        },
-        {
-          id: 3,
-          url: slugify("/security-systems/Analogue HD Cameras"),
-          name: "Analogue HD Cameras",
-        },
-        {
-          id: 4,
-          url: slugify("/security-systems/Vehicle DVRs"),
-          name: "Vehicle DVRs",
-        },
-        {
-          id: 5,
-          url: slugify("/security-systems/Vehicle Cameras"),
-          name: "Vehicle Cameras",
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "Biometric Systems",
-      elements: [
-        {
-          id: 1,
-          url: slugify("/security-systems/Access Control"),
-          name: "Access Control",
-        },
-        {
-          id: 2,
-          url: slugify("/security-systems/Attendance Systems"),
-          name: "Attendance Systems",
-        },
-        {
-          id: 3,
-          url: slugify("/security-systems/Software and Solutions"),
-          name: "Software and Solutions",
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: "Perimeter Security",
-      elements: [
-        {
-          id: 1,
-          url: slugify("/security-systems/Electric Fence"),
-          name: "Electric Fence",
-        },
-        {
-          id: 2,
-          url: slugify("/security-systems/Automatic Gates"),
-          name: "Automatic Gates",
-        },
-      ],
-    },
-
-    {
-      id: 4,
-      name: "Alarm System",
-      elements: [
-        {
-          id: 1,
-          url: slugify("/security-systems/Intruder Alarm Systems"),
-          name: "Intruder Alarm Systems",
-        },
-        {
-          id: 2,
-          url: slugify("/security-systems/Fire Alarm Systems"),
-          name: "Fire Alarm Systems",
-        },
-        {
-          id: 3,
-          url: slugify("/security-systems/Fire Doors"),
-          name: "Fire Doors",
-        },
-      ],
-    },
-    {
-      id: 5,
-      name: "system Guidance",
-      elements: [
-        {
-          id: 1,
-          url: slugify("/security-systems/CCTV Installation Guide"),
-          name: "CCTV Installation Guide",
-        },
-        {
-          id: 2,
-          url: slugify("/security-systems/Home Security Systems Setup"),
-          name: "Home Security Systems Setup",
-        },
-        {
-          id: 3,
-          url: slugify("/security-systems/Security Consultancy"),
-          name: "Security Consultancy",
-        },
-      ],
-    },
-  ];
+  const [isOpen, setIsOpen] = useState(false);
+  const { productsAndSolutions } = useSecuritySystemsContextProvider();
 
   return (
     <section
-      className={`flex w-full md:justify-center  ${
-        isSideBar ? "mb-0 shadow-none" : "mb-1 shadow-md"
+      className={`fixed top-0 left-0 w-full z-50 bg-white transition-shadow ${
+        isSideBar ? "mb-0 shadow-none" : "shadow-md"
       }`}
     >
       <nav
-        className={`flex relative items-center justify-between py-6 px-4 md:px-0 w-full max-w-5xl mx-auto  ${
+        className={`flex relative items-center justify-between py-6 px-4 md:px-0 w-full max-w-5xl mx-auto ${
           isSideBar ? "bg-pink-700 text-white" : ""
         }`}
       >
         {/* Left: Logo + Brand Name */}
         <Link to="/" className="flex items-center gap-2">
-          {/* Logo Circle */}
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-green-500 to-blue-600 flex items-center justify-center shadow-md">
             <img src={icon} alt="Harritech Logo" className="w-6 h-6" />
           </div>
-
-          {/* Brand Name */}
           <span
             className={`font-extrabold tracking-wide text-xl md:text-2xl space-x-[2px] font-sans ${
               isSideBar || activeUrlName !== "Home"
@@ -192,82 +73,52 @@ const HomeNavBar = () => {
         {/* Center: Large screen menu (condensed + more) */}
         <article className="hidden lg:flex gap-8 items-center">
           {/* show first two categories as main items to keep center compact */}
-          {productsAndSolutions.slice(0, 2).map((product) => (
-            <div key={product.id} className="relative group">
-              <button
-                type="button"
-                className="cursor-pointer font-medium text-gray-700 hover:text-pink-600 focus:outline-none"
-              >
-                {product.name}
-              </button>
+          {(productsAndSolutions ?? []).slice(0, 3).map((product) => {
+            const label =
+              typeof product?.name === "string" && product.name.length
+                ? product.name.charAt(0).toUpperCase() + product.name.slice(1)
+                : "";
 
-              {/* Dropdown: positioned directly below the trigger (no gap) */}
-              <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md z-50 min-w-[220px]">
-                <div className="py-2">
-                  {product.elements.map((el) => (
-                    <Link
-                      key={el.id}
-                      to={el.url}
-                      onClick={() => setActiveUrlName(el.name)}
-                      className={`block px-4 py-2 text-sm transition-colors ${
-                        currentPath === el.url
-                          ? "text-pink-600 font-semibold"
-                          : "text-gray-700"
-                      } hover:bg-gray-100 hover:text-pink-600`}
-                    >
-                      {el.name}
-                    </Link>
-                  ))}
+            return (
+              <div key={product.id ?? label} className="relative group">
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  className="cursor-pointer font-medium text-gray-700 hover:text-pink-600 focus:outline-none"
+                >
+                  {label}
+                </button>
+
+                <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md z-50 min-w-[220px]">
+                  <div className="py-2">
+                    {(product.elements ?? []).map((el) => {
+                      // build path: if backend returned a full path (starts with '/'), use it; otherwise prefix
+                      const path = el?.url?.startsWith("/")
+                        ? el.url
+                        : `/security-systems/${el?.url ?? ""}`;
+
+                      return (
+                        <Link
+                          key={el.id ?? el.name}
+                          to={path}
+                          onClick={() => setActiveUrlName(el.name)}
+                          className={`block px-4 py-2 text-sm transition-colors ${
+                            currentPath === path
+                              ? "text-pink-600 font-semibold"
+                              : "text-gray-700"
+                          } hover:bg-gray-100 hover:text-pink-600`}
+                        >
+                          {el.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          {/* New list item: Services */}
-          <div className="relative group">
-            <button className="cursor-pointer font-medium text-gray-700 hover:text-pink-600 focus:outline-none">
-              Services
-            </button>
-            <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md z-50 min-w-[220px]">
-              <div className="py-2">
-                <Link
-                  to="/services/installation"
-                  onClick={() => setActiveUrlName("Installation")}
-                  className={`block px-4 py-2 text-sm transition-colors ${
-                    currentPath === "/services/installation"
-                      ? "text-pink-600 font-semibold"
-                      : "text-gray-700"
-                  } hover:bg-gray-100 hover:text-pink-600`}
-                >
-                  Installation
-                </Link>
-                <Link
-                  to="/services/maintenance"
-                  onClick={() => setActiveUrlName("Maintenance")}
-                  className={`block px-4 py-2 text-sm transition-colors ${
-                    currentPath === "/services/maintenance"
-                      ? "text-pink-600 font-semibold"
-                      : "text-gray-700"
-                  } hover:bg-gray-100 hover:text-pink-600`}
-                >
-                  Maintenance
-                </Link>
-                <Link
-                  to="/services/consultancy"
-                  onClick={() => setActiveUrlName("Consultancy")}
-                  className={`block px-4 py-2 text-sm transition-colors ${
-                    currentPath === "/services/consultancy"
-                      ? "text-pink-600 font-semibold"
-                      : "text-gray-700"
-                  } hover:bg-gray-100 hover:text-pink-600`}
-                >
-                  Consultancy
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* More dropdown (holds remaining categories + About/Contact) */}
+          {/* More Dropdown */}
           <div className="relative group">
             <button className="cursor-pointer font-medium text-gray-700 hover:text-pink-600 focus:outline-none">
               More
@@ -275,33 +126,46 @@ const HomeNavBar = () => {
 
             <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md z-50 min-w-[200px]">
               <div className="py-2">
-                {/* remaining categories (slice from index 2) */}
-                {productsAndSolutions.slice(2).map((p) => (
-                  <div
-                    key={p.id}
-                    className="border-b last:border-b-0 border-gray-100"
-                  >
-                    <div className="px-4 py-2 text-sm font-semibold text-gray-800">
-                      {p.name}
-                    </div>
-                    {p.elements.map((el) => (
-                      <Link
-                        key={el.id}
-                        to={el.url}
-                        onClick={() => setActiveUrlName(el.name)}
-                        className={`block px-6 py-2 text-sm transition-colors ${
-                          currentPath === el.url
-                            ? "text-pink-600 font-semibold"
-                            : "text-gray-700"
-                        } hover:bg-gray-100 hover:text-pink-600`}
-                      >
-                        {el.name}
-                      </Link>
-                    ))}
-                  </div>
-                ))}
+                {(productsAndSolutions ?? []).slice(3).map((p) => {
+                  const pname =
+                    typeof p?.name === "string" && p.name.length
+                      ? p.name.charAt(0).toUpperCase() + p.name.slice(1)
+                      : "";
 
-                {/* utility links */}
+                  return (
+                    <div
+                      key={p.id ?? pname}
+                      className="border-b last:border-b-0 border-gray-100"
+                    >
+                      <div className="px-4 py-2 text-sm font-semibold text-gray-800">
+                        {pname}
+                      </div>
+
+                      {(p.elements ?? []).map((el) => {
+                        const path = el?.url?.startsWith("/")
+                          ? el.url
+                          : `/security-systems/${el?.url ?? ""}`;
+
+                        return (
+                          <Link
+                            key={el.id ?? el.name}
+                            to={path}
+                            onClick={() => setActiveUrlName(el.name)}
+                            className={`block px-6 py-2 text-sm transition-colors ${
+                              currentPath === path
+                                ? "text-pink-600 font-semibold"
+                                : "text-gray-700"
+                            } hover:bg-gray-100 hover:text-pink-600`}
+                          >
+                            {el.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+
+                {/* Utility links */}
                 <Link
                   to="/info/about-us"
                   onClick={() => setActiveUrlName("About Us")}
@@ -313,6 +177,7 @@ const HomeNavBar = () => {
                 >
                   About Us
                 </Link>
+
                 <Link
                   to="/contact"
                   onClick={() => setActiveUrlName("Contact")}
@@ -329,20 +194,18 @@ const HomeNavBar = () => {
           </div>
         </article>
 
-        {/* Right: Phone + Profile Menu */}
+        {/* Right: Phone + Login/Profile */}
         <article className="hidden lg:flex items-center gap-4">
-          {/* Phone Number */}
           <div className="flex items-center space-x-2 px-2 py-1 rounded-md bg-pink-50 shadow-sm w-fit">
             <FaPhoneAlt className="text-pink-700 text-sm" />
             <a
               href="tel:+254796802258"
-              className="font-semibold text-pink-700  tracking-wide"
+              className="font-semibold text-pink-700 tracking-wide"
             >
-              0796 802 258
+              0706 074 540
             </a>
           </div>
 
-          {/* If not logged in, show Login button */}
           {!token && (
             <Link
               to="/auth/login"
@@ -355,53 +218,70 @@ const HomeNavBar = () => {
             </Link>
           )}
 
-          {/* If logged in, show Profile dropdown */}
           {token && (
-            <div className="relative group">
+            <div className="relative">
               {/* Avatar Circle */}
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-400 to-blue-500 flex items-center justify-center text-white font-bold cursor-pointer group-hover:ring-2 group-hover:ring-green-400 transition">
-                U
+              <div
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-400 to-blue-500 flex items-center justify-center text-white font-bold cursor-pointer hover:ring-2 hover:ring-green-400 transition-all select-none"
+              >
+                {user?.name?.charAt(0).toUpperCase() || "U"}
               </div>
 
-              {/* Dropdown Menu */}
-              <div className="absolute right-0 hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-lg mt-1 min-w-[180px] z-40">
-                <Link
-                  to="/security-systems/create-posts"
-                  onClick={() => setActiveUrlName("Create Posts")}
-                  className={`block px-4 py-2 hover:bg-green-50 ${
-                    location.pathname === "/security-systems/create-posts"
-                      ? "text-green-500 font-semibold"
-                      : ""
-                  }`}
-                >
-                  Create Post
-                </Link>
-                <button
-                  onClick={onClickLogoutButton}
-                  className="w-full text-left block px-4 py-2 hover:bg-red-50 text-red-600"
-                >
-                  Logout
-                </button>
-              </div>
+              {/* Dropdown */}
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-48 bg-white text-gray-800 shadow-lg rounded-lg z-40 overflow-hidden"
+                  >
+                    <Link
+                      to="/security-systems/create-posts"
+                      onClick={() => {
+                        setActiveUrlName("Create Posts");
+                        setIsOpen(false);
+                      }}
+                      className={`block px-4 py-2 text-sm hover:bg-green-50 ${
+                        location.pathname === "/security-systems/create-posts"
+                          ? "text-green-500 font-semibold"
+                          : "text-gray-800"
+                      }`}
+                    >
+                      Create Post
+                    </Link>
+                    <button
+                      onClick={() => {
+                        onClickLogoutButton();
+                        setIsOpen(false);
+                      }}
+                      className="w-full text-left block px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </article>
 
-        {/* Mobile menu button */}
-        <article className="lg:hidden flex items-center  ">
+        {/* Mobile */}
+        <article className="lg:hidden flex items-center">
           <div className="flex items-center space-x-2 px-2 py-1 rounded-md bg-pink-50 shadow-sm w-fit">
             <FaPhoneAlt className="text-pink-700 text-sm" />
             <a
               href="tel:+254796802258"
               className="font-semibold text-pink-700 text-sm tracking-wide"
             >
-              0796 802 258
+              0706 074 540
             </a>
           </div>
-
           <button
             onClick={() => setIsSideBar(!isSideBar)}
-            className={`p-2 rounded-md  transition`}
+            className="p-1 py-2 rounded-md"
           >
             <AnimatePresence mode="wait" initial={false}>
               {isSideBar ? (
@@ -433,9 +313,9 @@ const HomeNavBar = () => {
         {isSideBar && (
           <motion.div
             initial={{ y: -20 }}
-            whileInView={{ y: 0 }}
-            transition={{ transition: 1 }}
-            className="absolute flex lg:hidden flex-col w-full top-20 bg-pink-700 text-white bg-opacity-[0.95] left-0 z-50"
+            animate={{ y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute flex lg:hidden flex-col w-full top-20 bg-pink-700 text-white bg-opacity-95 left-0 z-50"
           >
             <div className="w-full">
               <section className="w-full">
@@ -453,7 +333,6 @@ const HomeNavBar = () => {
                 </Link>
               </section>
 
-              {/* Reuse dropdown for mobile */}
               {productsAndSolutions.map((product) => (
                 <section
                   key={product.id}
@@ -470,21 +349,28 @@ const HomeNavBar = () => {
                     <span className="font-bold">{product.name}</span>
                     <span>{openProductId === product.id ? "▲" : "▼"}</span>
                   </article>
+
                   {openProductId === product.id &&
-                    product.elements.map((element) => (
-                      <Link
-                        key={element.id}
-                        to={element.url}
-                        onClick={() => setIsSideBar(false)}
-                        className={`block px-8 py-2 text-sm ${
-                          location.pathname === element.url
-                            ? "text-green-400"
-                            : "text-white"
-                        }`}
-                      >
-                        {element.name}
-                      </Link>
-                    ))}
+                    (product.elements ?? []).map((el) => {
+                      const path = el?.url?.startsWith("/")
+                        ? el.url
+                        : `/security-systems/${el?.url ?? ""}`;
+
+                      return (
+                        <Link
+                          key={el.id ?? el.name}
+                          to={path}
+                          onClick={() => setIsSideBar(false)}
+                          className={`block px-8 py-2 text-sm ${
+                            location.pathname === path
+                              ? "text-green-400"
+                              : "text-white"
+                          }`}
+                        >
+                          {el?.name ?? ""}
+                        </Link>
+                      );
+                    })}
                 </section>
               ))}
 

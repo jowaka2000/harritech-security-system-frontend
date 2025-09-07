@@ -1,31 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react"; // nice spinner icon
 import axiosClient from "../../axiosClient";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus, X } from "lucide-react";
 import EditSystemModelComponent from "../../components/show/EditSystemModelComponent";
 import { AddPost } from "../../components/show/AddPost";
+import SystemPostsComponent from "../../components/show/SystemPostsComponent";
+import TestimonialsComponent from "../../components/show/TestimonialsComponent";
+import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
+import RequestQuoteComponent from "../../components/show/RequestQuoteComponent";
 const ShowSystems = () => {
   const { public_id } = useParams();
 
-  const [testimonials, setTestimonials] = useState([
-    {
-      quote:
-        "This system made our site safer and easier to manage — fast install, reliable, and excellent support.",
-      name: "Sarah M.",
-      role: "Facility Manager",
-      project: "Commercial Property Client",
-    },
-    {
-      quote:
-        "The installation team was professional, and the system works flawlessly. I can now monitor my business remotely with complete peace of mind.",
-      name: "James K.",
-      role: "Business Owner",
-      project: "Retail Security Project",
-    },
-  ]);
+  // const [testimonials, setTestimonials] = useState([
+  //   {
+  //     quote:
+  //       "This system made our site safer and easier to manage — fast install, reliable, and excellent support.",
+  //     name: "Sarah M.",
+  //     role: "Facility Manager",
+  //     project: "Commercial Property Client",
+  //   },
+  //   {
+  //     quote:
+  //       "The installation team was professional, and the system works flawlessly. I can now monitor my business remotely with complete peace of mind.",
+  //     name: "James K.",
+  //     role: "Business Owner",
+  //     project: "Retail Security Project",
+  //   },
+  // ]);
 
-  const isAdmin = true;
   const [system, setSystem] = useState({ top_image: null, name: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,6 +41,21 @@ const ShowSystems = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [posts, setPosts] = useState([]); // optional:
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState(null);
+  const [isFabOpen, setIsFabOpen] = useState(false);
+  const { token, isAdmin } = useAuthContextProvider();
+
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+
+  // Example systems list (should come from backend)
+  const systemsList = [
+    "Cameras",
+    "Biometric Systems",
+    "Perimeter Security",
+    "Alarm Systems",
+    "IP Cameras Installation",
+  ];
 
   useEffect(() => {
     setLoading(true);
@@ -55,6 +73,23 @@ const ShowSystems = () => {
       })
       .finally(() => {
         setLoading(false);
+      });
+  }, [public_id]);
+
+  useEffect(() => {
+    setPostsLoading(true);
+    axiosClient
+      .get(`/posts/index/${public_id}`)
+      .then(({ data }) => {
+        setPosts(data);
+        setPostsError(null);
+      })
+      .catch((err) => {
+        console.error("Error fetching posts:", err);
+        setPostsError("Failed to load posts. Please try again later.");
+      })
+      .finally(() => {
+        setPostsLoading(false);
       });
   }, [public_id]);
 
@@ -95,13 +130,10 @@ const ShowSystems = () => {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(({ data }) => {
-        // update local posts if you’re tracking them
-        setPosts((prev) => [data, ...prev]);
-
-        // close modal
+        setPosts((prev) => [data, ...prev]); // update instantly
         setIsPostModalOpen(false);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   };
 
   const handleFileChange = (e) => {
@@ -209,6 +241,7 @@ const ShowSystems = () => {
         alert("Failed to update system details.");
       });
   };
+
   const renderImageSection = (src, alt, type) => (
     <div className="relative flex flex-col items-center w-full">
       <img
@@ -220,7 +253,7 @@ const ShowSystems = () => {
         {alt}
       </figcaption>
 
-      {isAdmin && (
+      {isAdmin && token && (
         <label className="absolute top-3 right-3 bg-white p-2 rounded-full shadow cursor-pointer hover:bg-gray-100">
           <Pencil size={18} className="text-gray-700" />
           <input
@@ -256,11 +289,11 @@ const ShowSystems = () => {
               <img
                 src={topImage || "/hero-illustration.svg"}
                 alt="System Hero"
-                className="w-64 h-64 object-contain rounded-lg shadow-lg border border-slate-200"
+                className="w-72 h-72  rounded-lg shadow-lg border border-slate-400"
               />
 
               {/* Pencil Button (Only Admin) */}
-              {isAdmin && (
+              {isAdmin && token && (
                 <>
                   <button
                     onClick={triggerFileInput}
@@ -333,30 +366,13 @@ const ShowSystems = () => {
             </ol>
           </aside>
 
-          {/* Row 3: Posts (left) | How it works (right) */}
-          <article className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="font-semibold text-lg mb-3 text-gray-800">Posts</h3>
-            <div className="space-y-3">
-              {/* Map real posts here; placeholders below */}
-              <div className="border rounded-md p-3">
-                <h4 className="font-medium text-gray-800">Sample post title</h4>
-                <p className="text-sm text-gray-600 mt-1">
-                  Short excerpt from post...
-                </p>
-              </div>
-
-              <div className="border rounded-md p-3">
-                <h4 className="font-medium text-gray-800">Another post</h4>
-                <p className="text-sm text-gray-600 mt-1">
-                  Short excerpt from post...
-                </p>
-              </div>
-
-              <div className="text-sm italic text-gray-500">
-                More posts coming soon...
-              </div>
-            </div>
-          </article>
+          {/* systems posts */}
+          <SystemPostsComponent
+            name={system.name}
+            posts={posts}
+            loading={postsLoading}
+            error={postsError}
+          />
 
           {system && system.howItWorks && (
             <article className="bg-white rounded-lg p-4 shadow-sm">
@@ -388,35 +404,10 @@ const ShowSystems = () => {
             </article>
           )}
 
-          <article className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg text-gray-800">
-                Testimonials ({testimonials.length})
-              </h3>
-              <button
-                className="bg-pink-600 text-white text-xs md:text-sm px-3 py-1 rounded-lg shadow hover:bg-pink-700 transition"
-                onClick={() =>
-                  alert("Feature coming soon: Add your testimony!")
-                }
-              >
-                Share Testimony
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {testimonials.map((t, index) => (
-                <div key={index}>
-                  <blockquote className="border-l-4 border-pink-600 pl-4 italic text-sm md:text-base text-gray-700">
-                    "{t.quote}"
-                  </blockquote>
-                  <p className="mt-3 text-xs md:text-sm font-medium text-gray-600">
-                    — {t.name}, {t.role}
-                  </p>
-                  <p className="text-xs text-gray-500">{t.project}</p>
-                </div>
-              ))}
-            </div>
-          </article>
+          <TestimonialsComponent
+            systemId={public_id}
+            systemName={system.name}
+          />
 
           {/* Row 5: About Harritech (left) | CTA / Request Quote (right) */}
           <aside className="bg-gradient-to-tr from-green-50 to-blue-50 rounded-lg p-4 shadow-sm rounded-tr-full rounded-bl-full bg-opacity-[0.1]">
@@ -431,57 +422,122 @@ const ShowSystems = () => {
           </aside>
 
           <div className="flex flex-row gap-4 items-center justify-center md:flex-col md:items-end">
-            <Link
-              to="/contact"
+            <a
+              href={`https://wa.me/254796802258?text=${encodeURIComponent(
+                `Hello, I need info about ${system.name}. Please provide more details.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-3 py-2 bg-pink-600 text-white rounded-md text-sm font-medium hover:bg-pink-700"
             >
               Contact Us
-            </Link>
-            <Link
-              to="/security-systems/create-posts"
-              className="px-3 py-2 border border-pink-600 text-pink-600 rounded-md text-sm font-medium hover:bg-pink-50"
-            >
-              Request Quote
-            </Link>
+            </a>
+
+            <div>
+              {/* Request Quote Button */}
+              <button
+                onClick={() => setIsRequestModalOpen(true)}
+                className="px-3 py-2 border border-pink-600 text-pink-600 rounded-md text-sm font-medium hover:bg-pink-50"
+              >
+                Request Quote
+              </button>
+
+              {/* Request Quote Modal */}
+              <RequestQuoteComponent
+                isOpen={isRequestModalOpen}
+                onClose={() => setIsRequestModalOpen(false)}
+                systemName={system.name}
+                systemsList={systemsList}
+              />
+            </div>
           </div>
         </section>
       </div>
 
-      {/* Bottom Action Buttons */}
-      <div className="fixed bottom-6 left-0 right-0 flex flex-col md:flex-row justify-center gap-4 px-4">
-        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-          {/* Edit Front Image */}
-          <label className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 shadow-md w-full md:w-auto">
-            <Pencil className="w-4 h-4" />
-            {uploading ? "Uploading..." : "Edit Front Image"}
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleFrontImageChange}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
+      {isAdmin && token && (
+        <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
+          {/* Mobile: Floating Action Button */}
+          <div className="md:hidden">
+            {isFabOpen && (
+              <div className="flex flex-col gap-3 mb-3">
+                {/* Edit Front Image */}
+                <label className="flex items-center justify-center bg-blue-600 text-white p-3 rounded-full cursor-pointer hover:bg-blue-700 shadow-md">
+                  <Pencil className="w-5 h-5" />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFrontImageChange}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </label>
 
-          {/* Edit System Details */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 shadow-md w-full md:w-auto"
-          >
-            <Pencil className="w-4 h-4" />
-            Edit Details
-          </button>
+                {/* Edit System Details */}
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center justify-center bg-pink-600 text-white p-3 rounded-full hover:bg-pink-700 shadow-md"
+                >
+                  <Pencil className="w-5 h-5" />
+                </button>
 
-          {/* Add Post (New Button) */}
-          <button
-            onClick={() => setIsPostModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow-md w-full md:w-auto"
-          >
-            <Pencil className="w-4 h-4" />
-            Add Post
-          </button>
+                {/* Add Post */}
+                <button
+                  onClick={() => setIsPostModalOpen(true)}
+                  className="flex items-center justify-center bg-green-600 text-white p-3 rounded-full hover:bg-green-700 shadow-md"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
+            {/* Floating Toggle Button */}
+            <button
+              onClick={() => setIsFabOpen(!isFabOpen)}
+              className="flex items-center justify-center bg-gray-800 text-white p-4 rounded-full shadow-lg hover:bg-gray-900"
+            >
+              {isFabOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Plus className="w-6 h-6" />
+              )}
+            </button>
+          </div>
+
+          {/* Desktop: Show inline buttons */}
+          <div className="hidden md:flex gap-4">
+            {/* Edit Front Image */}
+            <label className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 shadow-md">
+              <Pencil className="w-4 h-4" />
+              {uploading ? "Uploading..." : "Edit Front Image"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleFrontImageChange}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+
+            {/* Edit System Details */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 shadow-md"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit Details
+            </button>
+
+            {/* Add Post */}
+            <button
+              onClick={() => setIsPostModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow-md"
+            >
+              <Plus className="w-4 h-4" />
+              Add Post
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Edit System Modal */}
       <EditSystemModelComponent

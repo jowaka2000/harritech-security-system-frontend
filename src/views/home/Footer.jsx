@@ -29,7 +29,7 @@ const Footer = () => {
         <div>
           <h2 className="font-bold text-lg mb-3">Contact</h2>
           <p className="flex items-center gap-2">
-            <FaPhoneAlt /> 0796802258
+            <FaPhoneAlt /> 0706 074 540
           </p>
           <p className="flex items-center gap-2">
             <FaEnvelope /> info@harritech.com

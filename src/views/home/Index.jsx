@@ -5,6 +5,7 @@ import ThirdComponent from "../../components/home/ThirdComponent";
 import RequestServiceComponent from "../../components/home/RequestServiceComponent";
 import ComprehensiveSolutionComponent from "../../components/home/ComprehensiveSolutionComponent";
 import SecuritySolutions from "../../components/home/SecuritySolutions";
+import HeroSectionComponent from "../../components/home/HeroSectionComponent";
 
 const Index = () => {
   return (
@@ -12,7 +13,7 @@ const Index = () => {
       <div className="flex w-full justify-center">
         <LeadingItemComponent />
       </div>
-
+      <HeroSectionComponent />
       <div className="flex w-full justify-center">
         <SecondComponent />
       </div>

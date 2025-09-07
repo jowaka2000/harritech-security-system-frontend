@@ -1,16 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import HomeNavBar from "../components/navbars/HomeNavBar";
 import Footer from "../views/home/Footer";
+import { useSecuritySystemsContextProvider } from "../contexts/SecuritySystemsContextProvider";
+import { useAuthContextProvider } from "../contexts/AuthContextProvider";
 
 const AppLayout = () => {
+  const { fetchNamesUrl } = useSecuritySystemsContextProvider();
+  const { getMe, token } = useAuthContextProvider();
+  useEffect(() => {
+    fetchNamesUrl();
+    if (token) {
+      getMe();
+    }
+
+    // eslint-disable-next-line
+  }, []);
+
   return (
-    <div className="">
+    <div className="min-h-screen flex flex-col">
       <HomeNavBar />
 
-      <section className="max-w-5xl mx-auto mb-28">
+      <main className="flex-1 pt-16 max-w-5xl mx-auto mb-28 mt-7">
         <Outlet />
-      </section>
+      </main>
 
       <Footer />
     </div>
