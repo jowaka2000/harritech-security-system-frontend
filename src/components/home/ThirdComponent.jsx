@@ -93,14 +93,14 @@ const ThirdComponent = () => {
             <article className="w-full md:w-8/12 bg-white shadow-lg rounded-2xl p-8 border border-gray-100">
               <div className="space-y-4">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Why Harritech
+                  Why  {process.env.REACT_APP_WEBSITE_NAME}
                 </h2>
                 <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
                   We are committed to delivering the best security systems that
                   protect what matters most. With cutting-edge technology for
                   superior protection, professional setup to maximize
                   efficiency, and top-tier security solutions at competitive
-                  prices — Harritech is your trusted partner in safety.
+                  prices — Harristech is your trusted partner in safety.
                 </p>
               </div>
             </article>

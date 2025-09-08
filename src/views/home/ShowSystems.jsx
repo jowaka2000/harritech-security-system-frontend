@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react"; // nice spinner icon
 import axiosClient from "../../axiosClient";
-import { Pencil, Plus, X } from "lucide-react";
+import { Pencil, Plus, X, Camera } from "lucide-react";
 import EditSystemModelComponent from "../../components/show/EditSystemModelComponent";
 import { AddPost } from "../../components/show/AddPost";
 import SystemPostsComponent from "../../components/show/SystemPostsComponent";
@@ -48,13 +48,26 @@ const ShowSystems = () => {
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" }); // scrolls smoothly to top
+  }, []); // empty dependency = runs on mount
+
   // Example systems list (should come from backend)
   const systemsList = [
-    "Cameras",
-    "Biometric Systems",
-    "Perimeter Security",
-    "Alarm Systems",
     "IP Cameras Installation",
+    "DVRs and NVRs Installation",
+    "Analogue HD Cameras Installation",
+    "Vehicle DVRs Installation",
+    "Vehicle Cameras Installation",
+    "Biometric Access Control",
+    "Software and Solutions",
+    "Electric Fence Installation",
+    "Automatic Gates Installation",
+    "Intruder Alarm Systems Installation",
+    "Fire Alarm System Installation",
+    "CCTV Installation Guide",
+    "Home Security Systems Setup",
+    "Security Consultancy",
   ];
 
   useEffect(() => {
@@ -96,7 +109,7 @@ const ShowSystems = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 mt-36 mb-72 pb-72">
         <Loader2 className="w-8 h-8 animate-spin text-green-600" />
         <span className="ml-2 text-slate-600">Loading system...</span>
       </div>
@@ -412,10 +425,10 @@ const ShowSystems = () => {
           {/* Row 5: About Harritech (left) | CTA / Request Quote (right) */}
           <aside className="bg-gradient-to-tr from-green-50 to-blue-50 rounded-lg p-4 shadow-sm rounded-tr-full rounded-bl-full bg-opacity-[0.1]">
             <h3 className="font-semibold text-lg mb-2 text-gray-800">
-              About Harritech
+              About Harristech
             </h3>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Harritech specializes in security and automation solutions across
+              Harristech specializes in security and automation solutions across
               East Africa. We design user-friendly systems that are robust
               enough for enterprise use but simple enough for homeowners.
             </p>
@@ -462,7 +475,7 @@ const ShowSystems = () => {
               <div className="flex flex-col gap-3 mb-3">
                 {/* Edit Front Image */}
                 <label className="flex items-center justify-center bg-blue-600 text-white p-3 rounded-full cursor-pointer hover:bg-blue-700 shadow-md">
-                  <Pencil className="w-5 h-5" />
+                  <Camera className="w-4 h-4" />
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -507,7 +520,7 @@ const ShowSystems = () => {
           <div className="hidden md:flex gap-4">
             {/* Edit Front Image */}
             <label className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 shadow-md">
-              <Pencil className="w-4 h-4" />
+              <Camera className="w-4 h-4" />
               {uploading ? "Uploading..." : "Edit Front Image"}
               <input
                 type="file"

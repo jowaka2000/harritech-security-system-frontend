@@ -47,7 +47,7 @@ const HeroSectionComponent = () => {
           {/* CTA */}
           <div className="w-full flex justify-center lg:justify-end">
             <a
-              href="https://wa.me/254796802258?text=Hello%20HARRITECH%2C%20I%27m%20interested%20in%20Automatic%20Gate%20Installation"
+              href="https://wa.me/254796802258?text=Hello%20HARRISTECH%2C%20I%27m%20interested%20in%20Automatic%20Gate%20Installation"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 hover:shadow-lg text-white px-6 py-2.5 rounded-full shadow-md text-sm md:text-base font-medium transition-all duration-200"

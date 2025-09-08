@@ -4,7 +4,7 @@ const ServiceDescription = {
     name: "IP Cameras Installation",
     type:'cameras',
     shortDescription:
-      "HARRITECH installs IP cameras that deliver high-resolution surveillance with secure remote access from any internet-connected device.",
+      "HARRISTECH installs IP cameras that deliver high-resolution surveillance with secure remote access from any internet-connected device.",
     front_image: "",
     top_image: "",
     intermediate_image: "",

@@ -9,7 +9,7 @@ import { useSecuritySystemsContextProvider } from "../../contexts/SecuritySystem
 const HomeNavBar = () => {
   const [isSideBar, setIsSideBar] = useState(false);
 
-  const { token, setToken, setUser, user } = useAuthContextProvider();
+  const { token, setToken, setUser, user, isAdmin } = useAuthContextProvider();
 
   const [activeUrlName, setActiveUrlName] = useState("Home");
 
@@ -41,14 +41,14 @@ const HomeNavBar = () => {
       }`}
     >
       <nav
-        className={`flex relative items-center justify-between py-6 px-4 md:px-0 w-full max-w-5xl mx-auto ${
+        className={`flex relative items-center justify-between py-6 px-4 md:px-0 w-full max-w-5xl mx-auto  ${
           isSideBar ? "bg-pink-700 text-white" : ""
         }`}
       >
         {/* Left: Logo + Brand Name */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-green-500 to-blue-600 flex items-center justify-center shadow-md">
-            <img src={icon} alt="Harritech Logo" className="w-6 h-6" />
+            <img src={icon} alt="Harristech Logo" className="w-6 h-6" />
           </div>
           <span
             className={`font-extrabold tracking-wide text-xl md:text-2xl space-x-[2px] font-sans ${
@@ -58,7 +58,7 @@ const HomeNavBar = () => {
             }`}
           >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">
-              Harri
+              Harris
             </span>
             <span
               className={
@@ -179,10 +179,10 @@ const HomeNavBar = () => {
                 </Link>
 
                 <Link
-                  to="/contact"
+                  to="/info/contact-us"
                   onClick={() => setActiveUrlName("Contact")}
                   className={`block px-4 py-2 text-sm transition-colors ${
-                    currentPath === "/contact"
+                    currentPath === "/info/contact-us"
                       ? "text-pink-600 font-semibold"
                       : "text-gray-700"
                   } hover:bg-gray-100 hover:text-pink-600`}
@@ -315,7 +315,7 @@ const HomeNavBar = () => {
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute flex lg:hidden flex-col w-full top-20 bg-pink-700 text-white bg-opacity-95 left-0 z-50"
+            className="absolute flex lg:hidden flex-col w-full top-20 bg-pink-700 pb-4 text-white bg-opacity-95 left-0 z-50"
           >
             <div className="w-full">
               <section className="w-full">
@@ -346,7 +346,9 @@ const HomeNavBar = () => {
                     }
                     className="flex justify-between px-4 py-3 cursor-pointer"
                   >
-                    <span className="font-bold">{product.name}</span>
+                    <span className="font-bold">
+                      {product.name.toUpperCase()}
+                    </span>
                     <span>{openProductId === product.id ? "▲" : "▼"}</span>
                   </article>
 
@@ -374,7 +376,24 @@ const HomeNavBar = () => {
                 </section>
               ))}
 
-              <section className="w-full p-3 border-b">
+              <section className="w-full p-3 border-b border-gray-300">
+                <Link
+                  to="/info/contact-us"
+                  onClick={() => {
+                    setIsSideBar(false);
+                    setActiveUrlName("Contact Us");
+                  }}
+                  className={`font-bold ${
+                    location.pathname === "/info/contact-us"
+                      ? "text-green-400"
+                      : "text-white"
+                  }`}
+                >
+                  CONTACT US
+                </Link>
+              </section>
+
+              <section className="w-full p-3 border-b border-gray-300">
                 <Link
                   to="/info/about-us"
                   onClick={() => {
@@ -387,7 +406,7 @@ const HomeNavBar = () => {
                       : "text-white"
                   }`}
                 >
-                  About Us
+                  ABOUT US
                 </Link>
               </section>
 
@@ -411,7 +430,7 @@ const HomeNavBar = () => {
               )}
               {token && (
                 <>
-                  <section className="w-full p-3">
+                  <section className="w-full p-3 border-b border-gray-300">
                     <button
                       onClick={onClickLogoutButton}
                       type="button"
@@ -420,22 +439,25 @@ const HomeNavBar = () => {
                       Logout
                     </button>
                   </section>
-                  <section className="w-full p-3">
-                    <Link
-                      to="/security-systems/create-posts"
-                      onClick={() => {
-                        setIsSideBar(false);
-                        setActiveUrlName("Create Posts");
-                      }}
-                      className={`font-bold ${
-                        location.pathname === "/security-systems/create-posts"
-                          ? "text-green-400"
-                          : "text-white"
-                      }`}
-                    >
-                      Create Post
-                    </Link>
-                  </section>
+
+                  {isAdmin && (
+                    <section className="w-full p-3 border-b border-gray-300">
+                      <Link
+                        to="/security-systems/create-posts"
+                        onClick={() => {
+                          setIsSideBar(false);
+                          setActiveUrlName("Create Posts");
+                        }}
+                        className={`font-bold ${
+                          location.pathname === "/security-systems/create-posts"
+                            ? "text-green-400"
+                            : "text-white"
+                        }`}
+                      >
+                        Create Post
+                      </Link>
+                    </section>
+                  )}
                 </>
               )}
             </div>

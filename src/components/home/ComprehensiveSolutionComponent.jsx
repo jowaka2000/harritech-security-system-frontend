@@ -28,7 +28,7 @@ const ComprehensiveSolutionComponent = () => {
 
       {/* Description */}
       <p className="text-lg md:text-xl text-slate-600 leading-relaxed">
-        At <span className="font-semibold text-pink-700">Harritech</span>, we
+        At <span className="font-semibold text-pink-700">Harristech</span>, we
         provide tailored <b>security system installations</b> designed to
         safeguard your <b>home</b>, <b>business</b>, and <b>industrial sites</b>
         . Our solutions deliver not just protection but also peace of mind —

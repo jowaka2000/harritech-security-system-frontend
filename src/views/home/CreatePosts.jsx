@@ -68,9 +68,9 @@ const CreatePosts = () => {
   const [state, dispatch] = useReducer(reducer, defaultValues);
   const imageRef = useRef(null);
 
-  const { token } = useAuthContextProvider();
-
-  if (!token) {
+  const { token,isAdmin } = useAuthContextProvider();
+ 
+  if (!token && !isAdmin) {
     return <Navigate to="/" />;
   }
   const handleSubmit = (e) => {
@@ -122,7 +122,7 @@ const CreatePosts = () => {
   };
 
   return (
-    <div className="p-3 md:p-6 max-w-3xl mx-auto">
+    <div className="p-3 md:p-6 max-w-6xl mx-auto">
       <section className="bg-white shadow-xl rounded-2xl p-3 md:p-6 border border-gray-100">
         {/* Header */}
         <header className="flex justify-between items-center mb-8">

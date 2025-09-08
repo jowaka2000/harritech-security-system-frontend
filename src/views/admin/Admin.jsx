@@ -1,10 +1,19 @@
 import React, { useState } from "react";
 import axiosClient from "../../axiosClient";
 import ServiceDescription from "../../data/ServicesDescriptionData";
+import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
+import { Navigate } from "react-router-dom";
 
 const Admin = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const { token, isAdmin } = useAuthContextProvider();
+
+  if (!token && !isAdmin) {
+    return <Navigate to="/" />;
+  }
+  
 
   const handleSyncData = () => {
     setLoading(true);
@@ -27,7 +36,7 @@ const Admin = () => {
           entries.forEach(([key, item]) => {
             const payload = {
               name: item.name,
-              type:item.type,
+              type: item.type,
               shortDescription: item.shortDescription,
               front_image: null,
               top_image: null,

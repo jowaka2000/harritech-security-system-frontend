@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import LeadingItemComponent from "../../components/home/LeadingItemComponent";
 import SecondComponent from "../../components/home/SecondComponent";
 import ThirdComponent from "../../components/home/ThirdComponent";
@@ -8,6 +8,10 @@ import SecuritySolutions from "../../components/home/SecuritySolutions";
 import HeroSectionComponent from "../../components/home/HeroSectionComponent";
 
 const Index = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" }); // scrolls smoothly to top
+  }, []); 
+
   return (
     <div className="space-y-8 ">
       <div className="flex w-full justify-center">

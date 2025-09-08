@@ -16,7 +16,7 @@ const LeadingItemComponent = () => {
         {/* Overlay content */}
         <div className="relative z-10 text-center px-4">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-wide drop-shadow-lg">
-            HARRITECH
+            {process.env.REACT_APP_WEBSITE_NAME}
           </h1>
           <h2 className="text-lg md:text-2xl font-semibold italic mt-2">
             Security Systems

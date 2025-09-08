@@ -8,7 +8,7 @@ const SecondComponent = () => {
   <div className="md:w-7/12">
     <section className="space-y-6 bg-green-50 rounded-tr-3xl rounded-bl-3xl p-10 shadow-sm">
       <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 font-sans tracking-tight">
-        HARRITECH{" "}
+         {process.env.REACT_APP_WEBSITE_NAME}{" "}
         <span className="italic font-light text-green-700">
           Security Systems
         </span>

@@ -17,7 +17,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
-          <h1 className="text-3xl font-black italic">HARRITECH</h1>
+          <h1 className="text-3xl font-black italic">{process.env.REACT_APP_WEBSITE_NAME}</h1>
           <p className="italic text-sm">Security Systems</p>
           <p className="mt-4 text-gray-200 text-sm">
             We provide trusted and reliable security solutions for homes,
@@ -32,7 +32,7 @@ const Footer = () => {
             <FaPhoneAlt /> 0706 074 540
           </p>
           <p className="flex items-center gap-2">
-            <FaEnvelope /> info@harritech.com
+            <FaEnvelope /> {process.env.REACT_APP_API_PUBLIC_EMAIL}
           </p>
           <p className="flex items-center gap-2">
             <FaMapMarkerAlt /> Nairobi, Kenya
@@ -104,7 +104,7 @@ const Footer = () => {
 
         {/* Developed By */}
         <p className="text-sm text-gray-200">
-          © {new Date().getFullYear()} HARRITECH Security Systems. All Rights
+          © {new Date().getFullYear()} {process.env.REACT_APP_WEBSITE_NAME} Security Systems. All Rights
           Reserved.
         </p>
         <p className="text-xs text-gray-300">
