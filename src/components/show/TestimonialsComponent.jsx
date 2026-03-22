@@ -1,20 +1,12 @@
-// src/components/show/Testimonials.jsx
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, MessageSquare, Star } from "lucide-react";
 import axiosClient from "../../axiosClient";
 
-// Suggested quotes (lazy typing help 😅)
 const QUOTE_SUGGESTIONS = [
-  "This system really changed how I work! It has streamlined all my daily tasks and improved my efficiency tremendously.",
+  "This system really changed how I work! It has streamlined all my daily tasks.",
   "Super reliable and easy to use. Even someone with minimal technical knowledge can get started quickly.",
-  "I recommend it to all my colleagues. It has become an essential tool for our team collaboration.",
-  "A perfect solution for modern challenges. It adapts well to evolving business needs and scales seamlessly.",
-  "The support team was amazing! They guided me through setup and were always ready to answer my questions.",
-  "Setup was fast and painless. Everything worked out of the box, saving me a lot of time and frustration.",
-  "I feel much more secure using this system. The advanced features provide peace of mind and reliability.",
-  "The design is sleek and professional. It’s visually appealing and very intuitive to navigate.",
-  "It exceeded my expectations. Every feature works as promised, and it adds real value to my workflow.",
-  "A must-have for any serious organization. It enhances productivity and ensures all critical tasks are handled efficiently.",
+  "I recommend it to all my colleagues. It has become an essential tool for our team.",
+  "A perfect solution for modern challenges. It adapts well to evolving business needs.",
 ];
 
 const TestimonialsComponent = ({ systemId, systemName }) => {
@@ -23,142 +15,89 @@ const TestimonialsComponent = ({ systemId, systemName }) => {
   const [count, setCount] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
-    quote:
-      QUOTE_SUGGESTIONS[Math.floor(Math.random() * QUOTE_SUGGESTIONS.length)],
+    quote: QUOTE_SUGGESTIONS[Math.floor(Math.random() * QUOTE_SUGGESTIONS.length)],
   });
-  const [error, setError] = useState("");
 
-  // Fetch testimonials for the given system
   useEffect(() => {
     if (!systemId) return;
-
-    axiosClient
-      .get(`/testimonials/show/${systemId}`)
+    axiosClient.get(`/testimonials/show/${systemId}`)
       .then(({ data }) => {
         setCount(data.count);
         setTestimonials(data.testimonials);
       })
-      .catch((err) => console.error("Error fetching testimonials:", err));
+      .catch((err) => console.error(err));
   }, [systemId]);
 
-  // Handle form submission
   const handleSaveTestimony = () => {
-    setError("");
+    if (!formData.name.trim() || !formData.quote.trim()) return alert("Name and Quote required.");
 
-    // Simple validation
-    if (!formData.name.trim() || !formData.quote.trim()) {
-      setError("Both name and quote are required.");
-      return;
-    }
-
-    axiosClient
-      .post(`/testimonials/create/${systemId}`, {
-        name: formData.name,
-        quote: formData.quote,
-      })
+    axiosClient.post(`/testimonials/create/${systemId}`, formData)
       .then(({ data }) => {
-        setTestimonials((prev) => {
-          const updated = [data, ...prev]; // add new testimonial on top
-          return updated.slice(0, 3); // keep only the latest 3
-        });
-        setCount(count + 1); // Add new testimony to UI
-        setIsModalOpen(false); // Close modal
-        setFormData({
-          name: "",
-          quote:
-            QUOTE_SUGGESTIONS[
-              Math.floor(Math.random() * QUOTE_SUGGESTIONS.length)
-            ],
-        });
+        setTestimonials(prev => [data, ...prev].slice(0, 3));
+        setCount(c => c + 1);
+        setIsModalOpen(false);
+        setFormData({ name: "", quote: QUOTE_SUGGESTIONS[Math.floor(Math.random() * QUOTE_SUGGESTIONS.length)] });
       })
-      .catch((err) => {
-        console.error("Error saving testimony:", err);
-        setError("Failed to save testimony. Try again.");
-      });
+      .catch(() => alert("Failed to save testimony."));
   };
 
   return (
-    <article className="bg-white rounded-lg p-6 shadow-sm">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg text-gray-800">
-          Testimonials ({count})
+        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-green-600" /> Testimonials ({count})
         </h3>
         <button
-          className="flex items-center gap-1 bg-pink-600 text-white text-xs md:text-sm px-3 py-1 rounded-lg shadow hover:bg-pink-700 transition"
           onClick={() => setIsModalOpen(true)}
+          className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+          title="Add Testimonial"
         >
           <Plus className="w-4 h-4" />
-          Share Testimony
         </button>
       </div>
 
       {testimonials.length === 0 && (
-        <p className="text-gray-500 text-sm italic">
-          No testimonials yet. Be the first to share your experience!
-        </p>
+        <p className="text-slate-400 text-xs italic text-center py-4">No reviews yet.</p>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {testimonials.map((t, index) => (
-          <div key={index}>
-            <blockquote className="border-l-4 border-pink-600 pl-4 italic text-sm md:text-base text-gray-700">
-              "{t.quote}"
-            </blockquote>
-            <p className="mt-3 text-xs md:text-sm font-medium text-gray-600">
-              — {t.name}
-            </p>
-            <p className="text-xs text-gray-500">{systemName}</p>
+          <div key={index} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+            <div className="flex gap-1 mb-1">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}
+            </div>
+            <p className="text-xs text-slate-700 italic mb-2">"{t.quote}"</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">— {t.name}</p>
           </div>
         ))}
       </div>
 
-      {/* Modal */}
+      {/* Simple Modal Overlay */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h2 className="text-lg font-semibold mb-4">Share Your Testimony</h2>
-
-            {error && (
-              <p className="text-sm text-red-600 mb-3 font-medium">{error}</p>
-            )}
-
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl">
+            <h3 className="font-bold text-lg mb-4">Share Your Experience</h3>
             <input
               type="text"
               placeholder="Your Name"
-              className="w-full border rounded-md px-3 py-2 mb-3"
+              className="w-full border p-2 rounded-lg mb-3 text-sm"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
-
             <textarea
-              className="w-full border rounded-md px-3 py-2 mb-3"
+              className="w-full border p-2 rounded-lg mb-4 text-sm"
               rows="3"
               value={formData.quote}
-              onChange={(e) =>
-                setFormData({ ...formData, quote: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
             />
-
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveTestimony}
-                className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700"
-              >
-                Save
-              </button>
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+              <button onClick={handleSaveTestimony} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">Post</button>
             </div>
           </div>
         </div>
       )}
-    </article>
+    </div>
   );
 };
 

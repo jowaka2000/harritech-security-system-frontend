@@ -1,17 +1,42 @@
-import React, { useState } from "react";
-import icon from "../../assets/alarm.jpg";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
-import axiosClient from "../../axiosClient";
-import { FaPhoneAlt, FaBars, FaTimes } from "react-icons/fa";
 import { useSecuritySystemsContextProvider } from "../../contexts/SecuritySystemsContextProvider";
+import axiosClient from "../../axiosClient";
+import icon from "../../assets/alarm.jpg";
+
+// Import Lucide Icons
+import { 
+  Menu, 
+  X, 
+  Phone, 
+  User, 
+  ShieldCheck, 
+  ChevronDown,
+  LogOut,
+  FilePlus 
+} from "lucide-react";
+
 const HomeNavBar = () => {
-  const [isSideBar, setIsSideBar] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = decodeURIComponent(location.pathname);
 
+  // Context States
   const { token, setToken, setUser, user, isAdmin } = useAuthContextProvider();
+  const { productsAndSolutions } = useSecuritySystemsContextProvider();
 
-  const [activeUrlName, setActiveUrlName] = useState("Home");
+  // Local States
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [openMobileProductId, setOpenMobileProductId] = useState(null);
+
+  // Close menus on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
+  }, [location.pathname]);
 
   const onClickLogoutButton = () => {
     axiosClient
@@ -19,94 +44,63 @@ const HomeNavBar = () => {
       .then(({ data }) => {
         setToken(null);
         setUser({});
-        return <Navigate to="/" />;
+        navigate("/"); // Correct way to navigate after action
       })
       .catch((err) => {
         console.log(err);
       });
-    setIsSideBar(false);
-    setActiveUrlName("Logout");
   };
 
-  const [openProductId, setOpenProductId] = useState(null); // which product submenu is open
-  const location = useLocation(); // gives current URL
-  const currentPath = decodeURIComponent(location.pathname);
-  const [isOpen, setIsOpen] = useState(false);
-  const { productsAndSolutions } = useSecuritySystemsContextProvider();
-
   return (
-    <section
-      className={`fixed top-0 left-0 w-full z-50 bg-white transition-shadow ${
-        isSideBar ? "mb-0 shadow-none" : "shadow-md"
-      }`}
-    >
-      <nav
-        className={`flex relative items-center justify-between py-6 px-4 md:px-0 w-full max-w-5xl mx-auto  ${
-          isSideBar ? "bg-pink-700 text-white" : ""
-        }`}
-      >
-        {/* Left: Logo + Brand Name */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-green-500 to-blue-600 flex items-center justify-center shadow-md">
-            <img src={icon} alt="Harristech Logo" className="w-6 h-6" />
+    <section className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+      <nav className="relative flex items-center justify-between px-4 md:px-8 w-full max-w-7xl mx-auto h-20">
+        
+        {/* Left: Logo */}
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <img src={icon} alt="Harristech Logo" className="w-7 h-7 text-white" />
           </div>
-          <span
-            className={`font-extrabold tracking-wide text-xl md:text-2xl space-x-[2px] font-sans ${
-              isSideBar || activeUrlName !== "Home"
-                ? "text-white"
-                : "text-gray-900"
-            }`}
-          >
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">
+          <div className="flex flex-col leading-none">
+            <span className="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-700">
               Harris
             </span>
-            <span
-              className={
-                isSideBar ? "text-white italic" : "text-pink-600 italic"
-              }
-            >
+            <span className="font-bold text-lg text-slate-700 -mt-1 italic">
               tech
             </span>
-          </span>
+          </div>
         </Link>
 
-        {/* Center: Large screen menu (condensed + more) */}
-        <article className="hidden lg:flex gap-8 items-center">
-          {/* show first two categories as main items to keep center compact */}
+        {/* Center: Desktop Menu */}
+        <article className="hidden lg:flex items-center gap-1">
+          {/* Main Solutions Dropdowns (First 3) */}
           {(productsAndSolutions ?? []).slice(0, 3).map((product) => {
-            const label =
-              typeof product?.name === "string" && product.name.length
-                ? product.name.charAt(0).toUpperCase() + product.name.slice(1)
-                : "";
+            const label = product?.name 
+              ? product.name.charAt(0).toUpperCase() + product.name.slice(1) 
+              : "";
 
             return (
               <div key={product.id ?? label} className="relative group">
-                <button
-                  type="button"
-                  aria-haspopup="true"
-                  className="cursor-pointer font-medium text-gray-700 hover:text-pink-600 focus:outline-none"
-                >
+                <button className="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">
                   {label}
+                  <ChevronDown size={14} className="opacity-50 group-hover:translate-y-0.5 transition-transform" />
                 </button>
 
-                <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md z-50 min-w-[220px]">
-                  <div className="py-2">
+                {/* Dropdown Content */}
+                <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                  <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[220px] overflow-hidden">
                     {(product.elements ?? []).map((el) => {
-                      // build path: if backend returned a full path (starts with '/'), use it; otherwise prefix
-                      const path = el?.url?.startsWith("/")
-                        ? el.url
+                      const path = el?.url?.startsWith("/") 
+                        ? el.url 
                         : `/security-systems/${el?.url ?? ""}`;
+                      const isActive = currentPath === path;
 
                       return (
                         <Link
                           key={el.id ?? el.name}
                           to={path}
-                          onClick={() => setActiveUrlName(el.name)}
-                          className={`block px-4 py-2 text-sm transition-colors ${
-                            currentPath === path
-                              ? "text-pink-600 font-semibold"
-                              : "text-gray-700"
-                          } hover:bg-gray-100 hover:text-pink-600`}
+                          className={`block px-4 py-2.5 text-sm font-medium transition-colors ${
+                            isActive ? "text-blue-600 bg-blue-50" : "text-slate-600 hover:bg-gray-50 hover:text-slate-900"
+                          }`}
                         >
                           {el.name}
                         </Link>
@@ -118,352 +112,248 @@ const HomeNavBar = () => {
             );
           })}
 
-          {/* More Dropdown */}
+          {/* "More" Dropdown */}
           <div className="relative group">
-            <button className="cursor-pointer font-medium text-gray-700 hover:text-pink-600 focus:outline-none">
-              More
+            <button className="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">
+              More Solutions
+              <ChevronDown size={14} className="opacity-50 group-hover:translate-y-0.5 transition-transform" />
             </button>
 
-            <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md z-50 min-w-[200px]">
-              <div className="py-2">
-                {(productsAndSolutions ?? []).slice(3).map((p) => {
-                  const pname =
-                    typeof p?.name === "string" && p.name.length
-                      ? p.name.charAt(0).toUpperCase() + p.name.slice(1)
+            <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-2 min-w-[240px]">
+                <div className="space-y-1">
+                  {(productsAndSolutions ?? []).slice(3).map((p) => {
+                    const pname = p?.name 
+                      ? p.name.charAt(0).toUpperCase() + p.name.slice(1) 
                       : "";
+                    
+                    return (
+                      <div key={p.id ?? pname} className="relative group/sub">
+                        <div className="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          {pname}
+                        </div>
+                        {(p.elements ?? []).map((el) => {
+                          const path = el?.url?.startsWith("/") 
+                            ? el.url 
+                            : `/security-systems/${el?.url ?? ""}`;
+                          const isActive = currentPath === path;
 
-                  return (
-                    <div
-                      key={p.id ?? pname}
-                      className="border-b last:border-b-0 border-gray-100"
-                    >
-                      <div className="px-4 py-2 text-sm font-semibold text-gray-800">
-                        {pname}
+                          return (
+                            <Link
+                              key={el.id ?? el.name}
+                              to={path}
+                              className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                                isActive ? "text-blue-600 bg-blue-50" : "text-slate-600 hover:bg-slate-50"
+                              }`}
+                            >
+                              {el.name}
+                            </Link>
+                          );
+                        })}
                       </div>
-
-                      {(p.elements ?? []).map((el) => {
-                        const path = el?.url?.startsWith("/")
-                          ? el.url
-                          : `/security-systems/${el?.url ?? ""}`;
-
-                        return (
-                          <Link
-                            key={el.id ?? el.name}
-                            to={path}
-                            onClick={() => setActiveUrlName(el.name)}
-                            className={`block px-6 py-2 text-sm transition-colors ${
-                              currentPath === path
-                                ? "text-pink-600 font-semibold"
-                                : "text-gray-700"
-                            } hover:bg-gray-100 hover:text-pink-600`}
-                          >
-                            {el.name}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-
-                {/* Utility links */}
-                <Link
-                  to="/info/about-us"
-                  onClick={() => setActiveUrlName("About Us")}
-                  className={`block px-4 py-2 text-sm transition-colors ${
-                    currentPath === "/info/about-us"
-                      ? "text-pink-600 font-semibold"
-                      : "text-gray-700"
-                  } hover:bg-gray-100 hover:text-pink-600`}
-                >
-                  About Us
-                </Link>
-
-                <Link
-                  to="/info/contact-us"
-                  onClick={() => setActiveUrlName("Contact")}
-                  className={`block px-4 py-2 text-sm transition-colors ${
-                    currentPath === "/info/contact-us"
-                      ? "text-pink-600 font-semibold"
-                      : "text-gray-700"
-                  } hover:bg-gray-100 hover:text-pink-600`}
-                >
-                  Contact
-                </Link>
+                    );
+                  })}
+                </div>
+                
+                <div className="border-t border-gray-100 mt-2 pt-1">
+                   <Link to="/info/about-us" className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg">About Us</Link>
+                   <Link to="/info/contact-us" className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg">Contact</Link>
+                </div>
               </div>
             </div>
           </div>
         </article>
 
-        {/* Right: Phone + Login/Profile */}
-        <article className="hidden lg:flex items-center gap-4">
-          <div className="flex items-center space-x-2 px-2 py-1 rounded-md bg-pink-50 shadow-sm w-fit">
-            <FaPhoneAlt className="text-pink-700 text-sm" />
-            <a
-              href="tel:+254796802258"
-              className="font-semibold text-pink-700 tracking-wide"
-            >
-              0706 074 540
-            </a>
+        {/* Right: Actions */}
+        <article className="flex items-center gap-4">
+          {/* Phone CTA (Desktop) */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100">
+             <Phone className="text-blue-600 w-4 h-4" />
+             <a href="tel:+254796802258" className="text-sm font-bold text-slate-700 tracking-wide hover:text-blue-600 transition-colors">
+               0706 074 540
+             </a>
           </div>
 
-          {!token && (
+          {/* Auth Buttons */}
+          {!token ? (
             <Link
               to="/auth/login"
-              onClick={() => setActiveUrlName("Login")}
-              className={`px-4 py-2 rounded-lg font-medium border border-green-500 text-green-600 hover:bg-green-50 transition ${
-                location.pathname === "/auth/login" ? "bg-green-100" : ""
-              }`}
+              className="hidden md:inline-flex items-center justify-center px-5 py-2 text-sm font-semibold text-white bg-slate-900 rounded-lg hover:bg-blue-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               Login
             </Link>
-          )}
-
-          {token && (
+          ) : (
             <div className="relative">
-              {/* Avatar Circle */}
-              <div
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-400 to-blue-500 flex items-center justify-center text-white font-bold cursor-pointer hover:ring-2 hover:ring-green-400 transition-all select-none"
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-2 focus:outline-none"
               >
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-700 to-slate-900 text-white flex items-center justify-center font-bold ring-2 ring-white shadow-md">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </div>
+              </button>
 
-              {/* Dropdown */}
+              {/* User Dropdown */}
               <AnimatePresence>
-                {isOpen && (
+                {isUserMenuOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-2 w-48 bg-white text-gray-800 shadow-lg rounded-lg z-40 overflow-hidden"
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                    className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50"
                   >
-                    <Link
-                      to="/security-systems/create-posts"
-                      onClick={() => {
-                        setActiveUrlName("Create Posts");
-                        setIsOpen(false);
-                      }}
-                      className={`block px-4 py-2 text-sm hover:bg-green-50 ${
-                        location.pathname === "/security-systems/create-posts"
-                          ? "text-green-500 font-semibold"
-                          : "text-gray-800"
-                      }`}
-                    >
-                      Create Post
-                    </Link>
+                    <div className="px-4 py-3 border-b border-gray-100 bg-slate-50">
+                      <p className="text-xs text-slate-500 font-medium uppercase">Signed in as</p>
+                      <p className="text-sm font-bold text-slate-800 truncate">{user?.name || "User"}</p>
+                    </div>
+                    
+                    {isAdmin && (
+                      <Link
+                        to="/security-systems/create-posts"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                      >
+                        <FilePlus size={16} /> Create Post
+                      </Link>
+                    )}
+                    
                     <button
                       onClick={() => {
                         onClickLogoutButton();
-                        setIsOpen(false);
+                        setIsUserMenuOpen(false);
                       }}
-                      className="w-full text-left block px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors text-left"
                     >
-                      Logout
+                      <LogOut size={16} /> Logout
                     </button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
           )}
-        </article>
 
-        {/* Mobile */}
-        <article className="lg:hidden flex items-center">
-          <div className="flex items-center space-x-2 px-2 py-1 rounded-md bg-pink-50 shadow-sm w-fit">
-            <FaPhoneAlt className="text-pink-700 text-sm" />
-            <a
-              href="tel:+254796802258"
-              className="font-semibold text-pink-700 text-sm tracking-wide"
-            >
-              0706 074 540
-            </a>
-          </div>
+          {/* Mobile Toggle */}
           <button
-            onClick={() => setIsSideBar(!isSideBar)}
-            className="p-1 py-2 rounded-md"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 text-slate-700 hover:text-blue-600 focus:outline-none"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              {isSideBar ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <FaTimes className="w-7 h-7" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="open"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <FaBars className="w-7 h-7" />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </article>
+      </nav>
 
-        {/* Mobile Sidebar */}
-        {isSideBar && (
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
           <motion.div
-            initial={{ y: -20 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute flex lg:hidden flex-col w-full top-20 bg-pink-700 pb-4 text-white bg-opacity-95 left-0 z-50"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="lg:hidden overflow-hidden bg-slate-900 text-white border-t border-slate-800"
           >
-            <div className="w-full">
-              <section className="w-full">
-                <Link
-                  to="/"
-                  onClick={() => {
-                    setIsSideBar(false);
-                    setActiveUrlName("Home");
-                  }}
-                  className={`block px-4 py-3 border-b border-gray-300 font-bold ${
-                    location.pathname === "/" ? "text-green-400" : "text-white"
-                  }`}
-                >
-                  Home
-                </Link>
-              </section>
-
+            <div className="px-4 py-6 space-y-2">
+              {/* Mobile Products */}
               {productsAndSolutions.map((product) => (
-                <section
-                  key={product.id}
-                  className="w-full border-b border-gray-300"
-                >
-                  <article
-                    onClick={() =>
-                      setOpenProductId(
-                        openProductId === product.id ? null : product.id
-                      )
-                    }
-                    className="flex justify-between px-4 py-3 cursor-pointer"
+                <div key={product.id} className="border-b border-slate-800 pb-2">
+                  <button
+                    onClick={() => setOpenMobileProductId(
+                      openMobileProductId === product.id ? null : product.id
+                    )}
+                    className="w-full flex justify-between items-center py-3 text-left font-bold text-lg text-slate-100"
                   >
-                    <span className="font-bold">
-                      {product.name.toUpperCase()}
-                    </span>
-                    <span>{openProductId === product.id ? "▲" : "▼"}</span>
-                  </article>
-
-                  {openProductId === product.id &&
-                    (product.elements ?? []).map((el) => {
-                      const path = el?.url?.startsWith("/")
-                        ? el.url
-                        : `/security-systems/${el?.url ?? ""}`;
-
-                      return (
-                        <Link
-                          key={el.id ?? el.name}
-                          to={path}
-                          onClick={() => setIsSideBar(false)}
-                          className={`block px-8 py-2 text-sm ${
-                            location.pathname === path
-                              ? "text-green-400"
-                              : "text-white"
-                          }`}
-                        >
-                          {el?.name ?? ""}
-                        </Link>
-                      );
-                    })}
-                </section>
+                    <span>{product.name.toUpperCase()}</span>
+                    <motion.div
+                      animate={{ rotate: openMobileProductId === product.id ? 180 : 0 }}
+                    >
+                      <ChevronDown size={20} className="text-blue-400" />
+                    </motion.div>
+                  </button>
+                  
+                  <AnimatePresence>
+                    {openMobileProductId === product.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden pl-4 space-y-1"
+                      >
+                        {(product.elements ?? []).map((el) => {
+                          const path = el?.url?.startsWith("/") 
+                            ? el.url 
+                            : `/security-systems/${el?.url ?? ""}`;
+                            
+                          return (
+                            <Link
+                              key={el.id ?? el.name}
+                              to={path}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className={`block py-2 text-sm font-medium ${
+                                currentPath === path ? "text-blue-400" : "text-slate-400"
+                              } hover:text-white`}
+                            >
+                              {el.name}
+                            </Link>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
 
-              <section className="w-full p-3 border-b border-gray-300">
-                <Link
-                  to="/info/contact-us"
-                  onClick={() => {
-                    setIsSideBar(false);
-                    setActiveUrlName("Contact Us");
-                  }}
-                  className={`font-bold ${
-                    location.pathname === "/info/contact-us"
-                      ? "text-green-400"
-                      : "text-white"
-                  }`}
+              {/* Mobile Links */}
+              <div className="pt-4 space-y-1">
+                <Link 
+                  to="/info/about-us" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-3 font-bold text-lg border-b border-slate-800 hover:text-blue-400"
                 >
-                  CONTACT US
+                  About Us
                 </Link>
-              </section>
-
-              <section className="w-full p-3 border-b border-gray-300">
-                <Link
-                  to="/info/about-us"
-                  onClick={() => {
-                    setIsSideBar(false);
-                    setActiveUrlName("About Us");
-                  }}
-                  className={`font-bold ${
-                    location.pathname === "/info/about-us"
-                      ? "text-green-400"
-                      : "text-white"
-                  }`}
+                <Link 
+                  to="/info/contact-us" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-3 font-bold text-lg border-b border-slate-800 hover:text-blue-400"
                 >
-                  ABOUT US
+                  Contact Us
                 </Link>
-              </section>
+              </div>
 
-              {!token && (
-                <section className="w-full p-3">
-                  <Link
+              {/* Mobile Auth */}
+              <div className="pt-4 mt-4 border-t border-slate-800">
+                {!token ? (
+                   <Link
                     to="/auth/login"
-                    onClick={() => {
-                      setIsSideBar(false);
-                      setActiveUrlName("Login");
-                    }}
-                    className={`font-bold ${
-                      location.pathname === "/auth/login"
-                        ? "text-green-400"
-                        : "text-white"
-                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 rounded-lg font-bold hover:bg-blue-500 transition-colors"
                   >
-                    Login
+                    Login to Portal
                   </Link>
-                </section>
-              )}
-              {token && (
-                <>
-                  <section className="w-full p-3 border-b border-gray-300">
+                ) : (
+                  <div className="space-y-3">
+                    {isAdmin && (
+                       <Link
+                        to="/security-systems/create-posts"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 bg-slate-800 rounded-lg text-slate-200"
+                      >
+                        <FilePlus size={18} /> Create Post
+                      </Link>
+                    )}
                     <button
                       onClick={onClickLogoutButton}
-                      type="button"
-                      className="font-bold"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-400 font-medium hover:bg-slate-800 rounded-lg transition-colors"
                     >
-                      Logout
+                      <LogOut size={18} /> Logout
                     </button>
-                  </section>
-
-                  {isAdmin && (
-                    <section className="w-full p-3 border-b border-gray-300">
-                      <Link
-                        to="/security-systems/create-posts"
-                        onClick={() => {
-                          setIsSideBar(false);
-                          setActiveUrlName("Create Posts");
-                        }}
-                        className={`font-bold ${
-                          location.pathname === "/security-systems/create-posts"
-                            ? "text-green-400"
-                            : "text-white"
-                        }`}
-                      >
-                        Create Post
-                      </Link>
-                    </section>
-                  )}
-                </>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
-      </nav>
+      </AnimatePresence>
     </section>
   );
 };

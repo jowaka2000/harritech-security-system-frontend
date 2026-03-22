@@ -1,56 +1,57 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight, ImageOff } from "lucide-react";
 
-const SystemList = ({systems}) => {
+const SystemList = ({ systems }) => {
   return (
-    <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {systems.map((system) => {
-        const { public_id, name, shortDescription, front_image } = system;
+        const { id,url, name, shortDescription, front_image } = system;
 
         return (
           <Link
-            to={`/security-systems/${public_id}`}
-            key={public_id}
-            aria-label={`View ${name}`}
-            className="relative group bg-white rounded-2xl shadow-md border border-slate-200 p-5 flex flex-col hover:shadow-xl transition-all duration-300"
+            to={`/security-systems/${url}`}
+            key={id}
+            className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden"
           >
-            {/* Badge */}
-            <span className="absolute top-3 left-3 text-xs font-semibold bg-pink-600 text-white rounded-full px-3 py-1 shadow-sm">
-              {name}
-            </span>
-
-            {/* Image */}
-            <div className="flex justify-center items-center w-full h-40 md:h-48 overflow-hidden rounded-lg bg-slate-50">
+            {/* Image Container */}
+            <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
               {front_image ? (
                 <img
                   src={front_image}
                   alt={name}
-                  className="h-full w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               ) : (
-                <span className="text-slate-400 italic text-sm">
-                  No image available
-                </span>
+                <div className="flex flex-col items-center justify-center w-full h-full text-slate-300">
+                  <ImageOff className="w-8 h-8 mb-2" />
+                  <span className="text-xs font-medium">No Image</span>
+                </div>
               )}
+              
+              {/* Hover Overlay Gradient */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
             </div>
 
-            {/* Info */}
-            <div className="mt-4 flex-1 flex flex-col justify-between">
-              <h3 className="text-base md:text-lg font-semibold text-slate-800 line-clamp-3">
-                {shortDescription}
+            {/* Content */}
+            <div className="p-5 flex flex-col flex-1">
+              <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                {name}
               </h3>
+              
+              <p className="text-sm text-slate-500 line-clamp-3 mb-4 flex-1 leading-relaxed">
+                {shortDescription || "No description available for this system."}
+              </p>
 
-              {/* Learn More */}
-              <div className="mt-4 flex justify-center">
-                <span className="text-sm font-semibold text-green-700 group-hover:text-green-800 transition-colors">
-                  Learn more →
-                </span>
+              <div className="flex items-center text-sm font-semibold text-slate-900 mt-auto group-hover:translate-x-1 transition-transform">
+                View Details
+                <ArrowRight className="w-4 h-4 ml-1 text-blue-600" />
               </div>
             </div>
           </Link>
         );
       })}
-    </section>
+    </div>
   );
 };
 

@@ -1,5 +1,75 @@
 
 const ServiceDescription = {
+  
+  
+  "Automatic Gates": {
+    name: "Automatic Gates Installation",
+    type:'perimeter',
+    shortDescription:
+      "Automatic gates enhance property security while offering convenience through controlled access.",
+    image: { url: "", alt: "" },
+    fullDescription:
+      "Automatic gates provide secure and convenient entry management for residential, commercial, and community properties. They operate with remote controls, keypads, biometric access, or mobile apps, ensuring only authorized users gain entry. Built with strong materials and advanced mechanisms, they can be integrated with intercoms, cameras, and access control systems for a fully automated security solution. Automatic gates also improve property value, curb appeal, and overall safety.",
+    systemFunctions: [
+      "Provides controlled entry through remote or automated operation.",
+      "Integrates with intercoms, cameras, and biometric systems.",
+      "Enhances both property security and user convenience.",
+    ],
+    howItWorks: {
+      description:
+        "Automatic gates operate using motors and control units that open or close gates via remote signals, keypads, RFID tags, or mobile applications. Safety sensors prevent accidents by stopping or reversing the gate if an obstacle is detected. The system can integrate with CCTV, access control, or intercoms to verify and authorize entry.",
+      keyPoints: [
+        "Powered by motors controlled through remote signals or access systems.",
+        "Supports multiple access methods: remote, keypad, card, biometric, or app.",
+        "Safety sensors detect obstacles to prevent damage or injury.",
+        "Integration with intercoms and cameras for verification before entry.",
+        "Durable construction suitable for residential or commercial properties.",
+      ],
+    },
+    useCases: [
+      "Residential homes — secure driveways with remote-controlled gates.",
+      "Gated communities — centralize and control resident and visitor access.",
+      "Commercial properties — regulate vehicle entry into business premises.",
+      "Industrial facilities — secure entry points for trucks and staff.",
+      "High-value estates — enhance privacy and property value with automated access.",
+    ],
+  },
+  
+  "Electric Fence": {
+    name: "Electric Fence Installation",
+    type:'perimeter',
+    shortDescription:
+      "Electric fences provide an extra layer of defense to secure your property from intruders.",
+    image: { url: "electricFence", alt: "Electric Fence" },
+    fullDescription:
+      "Electric fences are one of the most effective solutions for perimeter security, creating both a physical and psychological barrier against intruders. They deliver a non-lethal electric shock to deter unauthorized entry attempts. Designed for residential, commercial, and industrial sites, electric fences can be integrated with alarm systems and monitoring platforms to provide immediate alerts. Durable and weather-resistant, they are suitable for securing large or high-risk perimeters.",
+    systemFunctions: [
+      "Delivers a non-lethal electric shock to deter intruders.",
+      "Integrates with alarm systems for real-time intrusion alerts.",
+      "Suitable for residential, commercial, and industrial perimeter security.",
+    ],
+    howItWorks: {
+      description:
+        "An electric fence system consists of energizers that convert power into high-voltage pulses, which are sent through fence wires. When an intruder touches the fence, they receive a non-lethal shock that discourages entry. The system can trigger alarms and notifications if the fence is cut, tampered with, or breached. Designed with insulators and grounding systems, electric fences are safe, effective, and weather-resistant.",
+      keyPoints: [
+        "Energizers send safe, high-voltage pulses through fence wires.",
+        "Delivers a non-lethal shock to deter intruders instantly.",
+        "Integrates with alarm panels for immediate alerts on breaches.",
+        "Durable construction withstands outdoor and harsh conditions.",
+        "Scalable design suitable for residential, commercial, or industrial perimeters.",
+      ],
+    },
+    useCases: [
+      "Residential estates — protect homes and gated communities from intrusion.",
+      "Farms & ranches — safeguard crops, livestock, and land perimeters.",
+      "Factories & warehouses — secure large industrial zones.",
+      "Commercial complexes — deter unauthorized access to business properties.",
+      "High-security facilities — integrate with surveillance for multi-layer protection.",
+      "Remote sites — provide perimeter security in areas without constant patrols.",
+    ],
+  },
+
+
   "Ip Cameras": {
     name: "IP Cameras Installation",
     type:'cameras',
@@ -286,73 +356,6 @@ const ServiceDescription = {
 
 
 
-
-  "Electric Fence": {
-    name: "Electric Fence Installation",
-    type:'perimeter',
-    shortDescription:
-      "Electric fences provide an extra layer of defense to secure your property from intruders.",
-    image: { url: "electricFence", alt: "Electric Fence" },
-    fullDescription:
-      "Electric fences are one of the most effective solutions for perimeter security, creating both a physical and psychological barrier against intruders. They deliver a non-lethal electric shock to deter unauthorized entry attempts. Designed for residential, commercial, and industrial sites, electric fences can be integrated with alarm systems and monitoring platforms to provide immediate alerts. Durable and weather-resistant, they are suitable for securing large or high-risk perimeters.",
-    systemFunctions: [
-      "Delivers a non-lethal electric shock to deter intruders.",
-      "Integrates with alarm systems for real-time intrusion alerts.",
-      "Suitable for residential, commercial, and industrial perimeter security.",
-    ],
-    howItWorks: {
-      description:
-        "An electric fence system consists of energizers that convert power into high-voltage pulses, which are sent through fence wires. When an intruder touches the fence, they receive a non-lethal shock that discourages entry. The system can trigger alarms and notifications if the fence is cut, tampered with, or breached. Designed with insulators and grounding systems, electric fences are safe, effective, and weather-resistant.",
-      keyPoints: [
-        "Energizers send safe, high-voltage pulses through fence wires.",
-        "Delivers a non-lethal shock to deter intruders instantly.",
-        "Integrates with alarm panels for immediate alerts on breaches.",
-        "Durable construction withstands outdoor and harsh conditions.",
-        "Scalable design suitable for residential, commercial, or industrial perimeters.",
-      ],
-    },
-    useCases: [
-      "Residential estates — protect homes and gated communities from intrusion.",
-      "Farms & ranches — safeguard crops, livestock, and land perimeters.",
-      "Factories & warehouses — secure large industrial zones.",
-      "Commercial complexes — deter unauthorized access to business properties.",
-      "High-security facilities — integrate with surveillance for multi-layer protection.",
-      "Remote sites — provide perimeter security in areas without constant patrols.",
-    ],
-  },
-
-  "Automatic Gates": {
-    name: "Automatic Gates Installation",
-    type:'perimeter',
-    shortDescription:
-      "Automatic gates enhance property security while offering convenience through controlled access.",
-    image: { url: "", alt: "" },
-    fullDescription:
-      "Automatic gates provide secure and convenient entry management for residential, commercial, and community properties. They operate with remote controls, keypads, biometric access, or mobile apps, ensuring only authorized users gain entry. Built with strong materials and advanced mechanisms, they can be integrated with intercoms, cameras, and access control systems for a fully automated security solution. Automatic gates also improve property value, curb appeal, and overall safety.",
-    systemFunctions: [
-      "Provides controlled entry through remote or automated operation.",
-      "Integrates with intercoms, cameras, and biometric systems.",
-      "Enhances both property security and user convenience.",
-    ],
-    howItWorks: {
-      description:
-        "Automatic gates operate using motors and control units that open or close gates via remote signals, keypads, RFID tags, or mobile applications. Safety sensors prevent accidents by stopping or reversing the gate if an obstacle is detected. The system can integrate with CCTV, access control, or intercoms to verify and authorize entry.",
-      keyPoints: [
-        "Powered by motors controlled through remote signals or access systems.",
-        "Supports multiple access methods: remote, keypad, card, biometric, or app.",
-        "Safety sensors detect obstacles to prevent damage or injury.",
-        "Integration with intercoms and cameras for verification before entry.",
-        "Durable construction suitable for residential or commercial properties.",
-      ],
-    },
-    useCases: [
-      "Residential homes — secure driveways with remote-controlled gates.",
-      "Gated communities — centralize and control resident and visitor access.",
-      "Commercial properties — regulate vehicle entry into business premises.",
-      "Industrial facilities — secure entry points for trucks and staff.",
-      "High-value estates — enhance privacy and property value with automated access.",
-    ],
-  },
 
   "Intruder Alarm Systems": {
     name: "Intruder Alarm Systems Installation",

@@ -9,34 +9,18 @@ import HeroSectionComponent from "../../components/home/HeroSectionComponent";
 
 const Index = () => {
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" }); // scrolls smoothly to top
-  }, []); 
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
+  }, []);
 
   return (
-    <div className="space-y-8 ">
-      <div className="flex w-full justify-center">
-        <LeadingItemComponent />
-      </div>
+    <div className="space-y-0">
+
+      <LeadingItemComponent />
       <HeroSectionComponent />
-      <div className="flex w-full justify-center">
-        <SecondComponent />
-      </div>
-
-      <div className="flex w-full justify-center">
-        <RequestServiceComponent />
-      </div>
-
-      <div className="flex w-full ">
-        <ComprehensiveSolutionComponent />
-      </div>
-
-      <div className="flex w-full ">
-        <ThirdComponent />
-      </div>
-
-      <div className="flex w-full">
-        <SecuritySolutions />
-      </div>
+      <SecondComponent />
+      <ThirdComponent />
+      <ComprehensiveSolutionComponent />
+      <SecuritySolutions />
     </div>
   );
 };

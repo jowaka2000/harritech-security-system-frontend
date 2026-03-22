@@ -21,7 +21,7 @@ const AppLayout = () => {
     <div className="min-h-screen flex flex-col">
       <HomeNavBar />
 
-      <main className="flex-1 pt-16 max-w-5xl mx-auto mb-28 mt-7">
+      <main className="flex-1 pt-20 max-w-6xl mx-auto mb-28 mt-7">
         <Outlet />
       </main>
 

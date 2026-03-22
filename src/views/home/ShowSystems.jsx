@@ -1,571 +1,520 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react"; // nice spinner icon
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  Loader2,
+  Pencil,
+  Image as ImageIcon,
+  FilePlus,
+  Shield,
+  ArrowRight,
+  CheckCircle2,
+  Bell,
+} from "lucide-react";
 import axiosClient from "../../axiosClient";
-import { Pencil, Plus, X, Camera } from "lucide-react";
 import EditSystemModelComponent from "../../components/show/EditSystemModelComponent";
 import { AddPost } from "../../components/show/AddPost";
 import SystemPostsComponent from "../../components/show/SystemPostsComponent";
 import TestimonialsComponent from "../../components/show/TestimonialsComponent";
 import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
 import RequestQuoteComponent from "../../components/show/RequestQuoteComponent";
+
 const ShowSystems = () => {
   const { public_id } = useParams();
+  const { token, isAdmin } = useAuthContextProvider();
 
-  // const [testimonials, setTestimonials] = useState([
-  //   {
-  //     quote:
-  //       "This system made our site safer and easier to manage — fast install, reliable, and excellent support.",
-  //     name: "Sarah M.",
-  //     role: "Facility Manager",
-  //     project: "Commercial Property Client",
-  //   },
-  //   {
-  //     quote:
-  //       "The installation team was professional, and the system works flawlessly. I can now monitor my business remotely with complete peace of mind.",
-  //     name: "James K.",
-  //     role: "Business Owner",
-  //     project: "Retail Security Project",
-  //   },
-  // ]);
-
+  // State
   const [system, setSystem] = useState({ top_image: null, name: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updating, setUpdating] = useState(false);
-  const [topImage, setTopImage] = useState(
-    system.top_image || "/hero-illustration.svg"
-  );
+  const [topImage, setTopImage] = useState("");
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [posts, setPosts] = useState([]); // optional:
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsError, setPostsError] = useState(null);
-  const [isFabOpen, setIsFabOpen] = useState(false);
-  const { token, isAdmin } = useAuthContextProvider();
 
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" }); // scrolls smoothly to top
-  }, []); // empty dependency = runs on mount
-
-  // Example systems list (should come from backend)
+  // Mock systems list for the quote dropdown
   const systemsList = [
     "IP Cameras Installation",
-    "DVRs and NVRs Installation",
-    "Analogue HD Cameras Installation",
-    "Vehicle DVRs Installation",
-    "Vehicle Cameras Installation",
-    "Biometric Access Control",
-    "Software and Solutions",
-    "Electric Fence Installation",
-    "Automatic Gates Installation",
-    "Intruder Alarm Systems Installation",
-    "Fire Alarm System Installation",
-    "CCTV Installation Guide",
-    "Home Security Systems Setup",
-    "Security Consultancy",
+    "DVRs and NVRs",
+    "Electric Fence",
+    "Automatic Gates",
+    "Biometric Access",
+    "Intruder Alarms",
+    "Fire Alarms",
   ];
 
+  // --- Fetch Data ---
   useEffect(() => {
-    setLoading(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
+    setLoading(true);
     axiosClient
       .get(`/systems/${public_id}`)
       .then((res) => {
         setSystem(res.data);
         setTopImage(res.data.top_image);
-        setError(null);
       })
       .catch((err) => {
-        console.error("Error fetching system:", err);
-        setError("Failed to load system details. Please try again.");
+        console.error(err);
+        setError("Failed to load system.");
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [public_id]);
 
   useEffect(() => {
     setPostsLoading(true);
     axiosClient
       .get(`/posts/index/${public_id}`)
-      .then(({ data }) => {
-        setPosts(data);
-        setPostsError(null);
-      })
-      .catch((err) => {
-        console.error("Error fetching posts:", err);
-        setPostsError("Failed to load posts. Please try again later.");
-      })
-      .finally(() => {
-        setPostsLoading(false);
-      });
+      .then(({ data }) => setPosts(data))
+      .catch(() => setPostsError("Failed to load posts"))
+      .finally(() => setPostsLoading(false));
   }, [public_id]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 mt-36 mb-72 pb-72">
-        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-        <span className="ml-2 text-slate-600">Loading system...</span>
-      </div>
-    );
-  }
+  // --- Handlers ---
+  // Generic Upload Helper
+  const handleUpload = (file, type) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      alert("JPG, PNG, or WEBP only.");
+      return;
+    }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-600">
-        {error}
-      </div>
-    );
-  }
+    const formData = new FormData();
 
-  // Empty state
-  if (!system) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-500">
-        No system found.
-      </div>
-    );
-  }
+    // Convert to snake_case by default (top-image -> top_image)
+    let formKey = type.replace("-", "_");
 
-  // Handle saving a new post
+    // SPECIAL FIX: The backend validation for Front Image expects 'front-image' (hyphen)
+    // whereas Top Image expects 'top_image' (underscore).
+    if (type === "front-image") {
+      formKey = "front-image";
+    }
+
+    // ADDED: Intermediate Image also likely expects a hyphen in validation
+    if (type === "intermediate-image") {
+      formKey = "intermediate-image";
+    }
+
+    formData.append(formKey, file);
+    setUploading(true);
+
+    axiosClient
+      .post(`/systems/${public_id}/upload-${type}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(({ data }) => {
+        // We use 'formKey' to retrieve the response.
+        // If the backend returns the URL using the same key we sent, this works.
+        const imageUrl = data[formKey];
+
+        if (type === "top-image") setTopImage(imageUrl);
+        else if (type === "front-image")
+          setSystem((prev) => ({ ...prev, front_image: imageUrl }));
+        else if (type === "intermediate-image")
+          setSystem((prev) => ({ ...prev, intermediate_image: imageUrl }));
+      })
+      .catch((err) => {
+        console.error("Upload failed", err);
+        alert("Upload failed.");
+      })
+      .finally(() => setUploading(false));
+  };
+
   const handleSavePost = (formData) => {
     formData.append("system_id", system.public_id);
-
     axiosClient
       .post(`/posts/create/${system.public_id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(({ data }) => {
-        setPosts((prev) => [data, ...prev]); // update instantly
+        setPosts((prev) => [data, ...prev]);
         setIsPostModalOpen(false);
       })
-      .catch((err) => console.error(err));
+      .catch(console.error);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, or WEBP images are allowed.");
-      return;
-    }
-
-    // Prepare upload
-    const formData = new FormData();
-    formData.append("top_image", file);
-
-    setUploading(true);
-
-    axiosClient
-      .post(`/systems/${system.public_id}/upload-top-image`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((res) => {
-        setTopImage(res.data.top_image); // update state with new image URL
-      })
-      .catch((err) => {
-        console.error("Upload failed:", err);
-        alert("Failed to upload image. Try again.");
-      })
-      .finally(() => setUploading(false));
-  };
-
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-  const handleImageUpload = (file, type) => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append(type, file);
-
-    setUpdating(true);
-
-    axiosClient
-      .post(`/systems/${system.public_id}/upload-${type}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((res) => {
-        // Update state dynamically after successful upload
-        if (type === "top-image") {
-          system.top_image = res.data[type];
-        } else if (type === "intermediate-image") {
-          system.intermediate_image = res.data[type];
-        }
-      })
-      .catch((err) => {
-        console.error(`Error uploading ${type}:`, err);
-        alert("Failed to upload image. Please try again.");
-      })
-      .finally(() => setUpdating(false));
-  };
-
-  // Handle front image upload
-  const handleFrontImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      alert("Only JPG, PNG, and WEBP images are allowed.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("front-image", file);
-
-    setUploading(true);
-
-    axiosClient
-      .post(`/systems/${system.public_id}/upload-front-image`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then(({ data }) => {
-        setSystem((prev) => ({ ...prev, front_image: data.front_image }));
-      })
-      .catch((err) => {
-        console.error("Error uploading front image:", err);
-        alert("Failed to upload image. Try again.");
-      })
-      .finally(() => setUploading(false));
-  };
-
-  // Save system details from modal
   const handleSaveDetails = (updatedData) => {
     axiosClient
       .put(`/systems/update/${system.public_id}`, updatedData)
       .then(({ data }) => {
-        setSystem(data.system); // update parent state
+        setSystem(data.system);
         setIsModalOpen(false);
       })
-      .catch((err) => {
-        console.error("Error updating system:", err);
-        alert("Failed to update system details.");
-      });
+      .catch(() => alert("Failed to update details."));
   };
 
-  const renderImageSection = (src, alt, type) => (
-    <div className="relative flex flex-col items-center w-full">
-      <img
-        src={src || "/placeholder.png"}
-        alt={alt}
-        className="w-full max-h-80 object-cover rounded-xl shadow-md"
-      />
-      <figcaption className="text-xs italic text-gray-600 mt-2">
-        {alt}
-      </figcaption>
+  // --- Loading / Error States ---
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] bg-slate-50">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
+        <span className="text-slate-600 font-medium">
+          Loading system details...
+        </span>
+      </div>
+    );
+  }
 
-      {isAdmin && token && (
-        <label className="absolute top-3 right-3 bg-white p-2 rounded-full shadow cursor-pointer hover:bg-gray-100">
-          <Pencil size={18} className="text-gray-700" />
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="hidden"
-            disabled={updating}
-            onChange={(e) => handleImageUpload(e.target.files[0], type)}
-          />
-        </label>
-      )}
-    </div>
-  );
+
+  if (error || !system) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] text-red-500">
+        <span className="text-xl font-bold mb-2">Oops!</span>
+        <span>{error || "System not found."}</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 relative">
-      <div className="space-y-10">
-        {/* HERO */}
-        <section className="w-full bg-pink-700 text-white rounded-br-[10rem] md:rounded-br-none relative">
-          <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto px-6 py-12">
-            {/* Left: Text */}
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-5xl font-black font-serif">
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* --- HERO SECTION (Replaced Pink with Slate/Blue) --- */}
+      <section className="bg-slate-900 text-white pt-12 pb-16 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)",
+            backgroundSize: "30px 30px",
+          }}
+        ></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            {/* Text Content */}
+            <div className="md:w-1/2 space-y-6">
+              <Link
+                to="/security-systems"
+                className="inline-flex items-center text-slate-400 hover:text-white transition-colors text-sm mb-2"
+              >
+                <ArrowRight className="w-4 h-4 rotate-180 mr-1" /> Back to
+                Solutions
+              </Link>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
                 {system.name}
               </h1>
-              <p className="mt-4 text-lg md:text-xl text-pink-100">
-                Explore secure and modern solutions with Harritech.
+              <p className="text-lg text-slate-300 max-w-xl">
+                {system.shortDescription ||
+                  "Secure your property with our advanced solutions."}
               </p>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setIsRequestModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-blue-500/30"
+                >
+                  Request Quote
+                </button>
+                <a
+                  href={`https://wa.me/254706074540?text=Info about ${system.name}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg font-semibold transition border border-slate-700"
+                >
+                  Chat on WhatsApp
+                </a>
+              </div>
             </div>
 
-            {/* Right: Image Section */}
-            <div className="flex-1 flex justify-center relative">
-              <img
-                src={topImage || "/hero-illustration.svg"}
-                alt="System Hero"
-                className="w-72 h-72  rounded-lg shadow-lg border border-slate-400"
-              />
+            {/* Hero Image */}
+            <div className="md:w-1/2 w-full relative group">
+              <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
+                <img
+                  src={topImage || "/placeholder.png"}
+                  alt={system.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
 
-              {/* Pencil Button (Only Admin) */}
-              {isAdmin && token && (
-                <>
-                  <button
-                    onClick={triggerFileInput}
-                    className="absolute top-2 right-2 bg-white text-pink-700 p-2 rounded-full shadow hover:bg-pink-100 transition"
-                    disabled={uploading}
-                  >
-                    {uploading ? (
-                      <span className="animate-spin w-4 h-4 border-2 border-pink-700 border-t-transparent rounded-full inline-block"></span>
-                    ) : (
-                      <Pencil size={16} />
-                    )}
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={handleFileChange}
-                  />
-                </>
-              )}
+                {/* Admin Overlay for Top Image */}
+                {isAdmin && token && (
+                  <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                    <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 hover:bg-white/20">
+                      <ImageIcon className="w-8 h-8 text-white" />
+                    </div>
+
+                    {/* This is the hidden input. Clicking the label (or icon) triggers this. */}
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          handleUpload(file, "top-image");
+                          e.target.value = ""; // Reset input value here
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* MAIN CONTENT: grid with max 2 columns on md+ (so each row ≤ 2 items) */}
-        <section className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Row 1: Name + Short description (left) | Image (right) */}
-          {/* Text Info */}
-          {/* Text (sticks to bottom on large screens) */}
-          <article className="lg:flex-1 lg:self-end space-y-3  md:pb-12">
-            <h2 className="font-black text-2xl mb-1 text-gray-800">
-              {system.name}
-            </h2>
-            <p className="text-base md:text-lg leading-relaxed indent-6 text-gray-700">
-              {system.shortDescription}
-            </p>
-          </article>
-
-          {/* Intermediate Image */}
-          <figure>
-            {renderImageSection(
-              system.intermediate_image,
-              system.name,
-              "intermediate-image"
-            )}
-          </figure>
-
-          {/* Row 2: Full Description (left) | Benefits (right) */}
-          <article className="rounded-2xl rounded-tr-full rounded-bl-full bg-opacity-[0.1] p-4 bg-gradient-to-r from-pink-100 to-pink-200 ">
-            <h3 className="font-semibold text-lg mb-2 text-gray-800">
-              Overview
-            </h3>
-            <p className="leading-relaxed text-gray-700">
-              {system.fullDescription}
-            </p>
-          </article>
-
-          <article></article>
-          <article></article>
-
-          <aside className="bg-pink-700 rounded-xl p-4  rounded-tl-full rounded-br-full bg-opacity-[0.1]">
-            <h3 className="font-black text-lg mb-3 text-gray-800">
-              {system.name} Benefits
-            </h3>
-            <ol className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-700">
-              {system.systemFunctions.map((b, i) => (
-                <li key={i}>{b}</li>
-              ))}
-            </ol>
-          </aside>
-
-          {/* systems posts */}
-          <SystemPostsComponent
-            name={system.name}
-            posts={posts}
-            loading={postsLoading}
-            error={postsError}
-          />
-
-          {system && system.howItWorks && (
-            <article className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">
-                How it works
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-700">
-                {system.howItWorks.description}
-              </p>
-              <ul className="mt-3 list-inside list-decimal text-sm space-y-1 text-gray-700">
-                {system.howItWorks.keyPoints.map((point, index) => {
-                  return <li key={index}>{point}</li>;
-                })}
-              </ul>
-            </article>
-          )}
-
-          {/* Row 4: Use Cases (left) | Testimonials (right) */}
-          {system && system.useCases && (
-            <article className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">
-                Use cases
-              </h3>
-              <ul className="list-disc pl-5 text-sm space-y-2 text-gray-700">
-                {system.useCases.map((cases, index) => {
-                  return <li key={index}>{cases}</li>;
-                })}
-              </ul>
-            </article>
-          )}
-
-          <TestimonialsComponent
-            systemId={public_id}
-            systemName={system.name}
-          />
-
-          {/* Row 5: About Harritech (left) | CTA / Request Quote (right) */}
-          <aside className="bg-gradient-to-tr from-green-50 to-blue-50 rounded-lg p-4 shadow-sm rounded-tr-full rounded-bl-full bg-opacity-[0.1]">
-            <h3 className="font-semibold text-lg mb-2 text-gray-800">
-              About Harristech
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              Harristech specializes in security and automation solutions across
-              East Africa. We design user-friendly systems that are robust
-              enough for enterprise use but simple enough for homeowners.
-            </p>
-          </aside>
-
-          <div className="flex flex-row gap-4 items-center justify-center md:flex-col md:items-end">
-            <a
-              href={`https://wa.me/254796802258?text=${encodeURIComponent(
-                `Hello, I need info about ${system.name}. Please provide more details.`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-2 bg-pink-600 text-white rounded-md text-sm font-medium hover:bg-pink-700"
-            >
-              Contact Us
-            </a>
-
-            <div>
-              {/* Request Quote Button */}
-              <button
-                onClick={() => setIsRequestModalOpen(true)}
-                className="px-3 py-2 border border-pink-600 text-pink-600 rounded-md text-sm font-medium hover:bg-pink-50"
-              >
-                Request Quote
-              </button>
-
-              {/* Request Quote Modal */}
-              <RequestQuoteComponent
-                isOpen={isRequestModalOpen}
-                onClose={() => setIsRequestModalOpen(false)}
-                systemName={system.name}
-                systemsList={systemsList}
-              />
-            </div>
-          </div>
-        </section>
-      </div>
-
+      {/* --- ADMIN TOOLBAR --- */}
       {isAdmin && token && (
-        <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
-          {/* Mobile: Floating Action Button */}
-          <div className="md:hidden">
-            {isFabOpen && (
-              <div className="flex flex-col gap-3 mb-3">
-                {/* Edit Front Image */}
-                <label className="flex items-center justify-center bg-blue-600 text-white p-3 rounded-full cursor-pointer hover:bg-blue-700 shadow-md">
-                  <Camera className="w-4 h-4" />
+        <div className="sticky top-20 z-40 border-y border-slate-200 bg-white/95 backdrop-blur shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+                <Shield className="w-4 h-4" />
+                <span>Admin Tools:</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {/* Edit Details */}
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 text-sm font-medium transition"
+                >
+                  <Pencil size={16} /> Edit Details
+                </button>
+
+                {/* Upload Front Image */}
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 text-sm font-medium transition cursor-pointer">
+                  <ImageIcon size={16} />{" "}
+                  {uploading ? "Uploading..." : "Upload Front Image"}
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={handleFrontImageChange}
                     className="hidden"
-                    disabled={uploading}
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        handleUpload(file, "front-image");
+                        e.target.value = "";
+                      }
+                    }}
                   />
                 </label>
 
-                {/* Edit System Details */}
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex items-center justify-center bg-pink-600 text-white p-3 rounded-full hover:bg-pink-700 shadow-md"
-                >
-                  <Pencil className="w-5 h-5" />
-                </button>
+                {/* --- NEW: Upload Content Image --- */}
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 text-sm font-medium transition cursor-pointer">
+                  <ImageIcon size={16} />{" "}
+                  {uploading ? "Uploading..." : "Upload Content Image"}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        handleUpload(file, "intermediate-image");
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                </label>
 
                 {/* Add Post */}
                 <button
                   onClick={() => setIsPostModalOpen(true)}
-                  className="flex items-center justify-center bg-green-600 text-white p-3 rounded-full hover:bg-green-700 shadow-md"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-md hover:bg-green-100 text-sm font-medium transition"
                 >
-                  <Plus className="w-5 h-5" />
+                  <FilePlus size={16} /> Add Update
                 </button>
               </div>
-            )}
-
-            {/* Floating Toggle Button */}
-            <button
-              onClick={() => setIsFabOpen(!isFabOpen)}
-              className="flex items-center justify-center bg-gray-800 text-white p-4 rounded-full shadow-lg hover:bg-gray-900"
-            >
-              {isFabOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Plus className="w-6 h-6" />
-              )}
-            </button>
-          </div>
-
-          {/* Desktop: Show inline buttons */}
-          <div className="hidden md:flex gap-4">
-            {/* Edit Front Image */}
-            <label className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 shadow-md">
-              <Camera className="w-4 h-4" />
-              {uploading ? "Uploading..." : "Edit Front Image"}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleFrontImageChange}
-                className="hidden"
-                disabled={uploading}
-              />
-            </label>
-
-            {/* Edit System Details */}
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 shadow-md"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit Details
-            </button>
-
-            {/* Add Post */}
-            <button
-              onClick={() => setIsPostModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              Add Post
-            </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Edit System Modal */}
+      {/* --- MAIN CONTENT (Sidebar Layout) --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* LEFT COLUMN: Main Content (2/3 width) */}
+          <div className="lg:col-span-2 space-y-10">
+            {/* Description & Overview */}
+            <section className="space-y-6">
+              <h2 className="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-4">
+                Overview
+              </h2>
+              <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                <p className="text-lg">{system.fullDescription}</p>
+
+                {/* Intermediate Image (if exists) */}
+                {system.intermediate_image && (
+                  <div className="my-8 rounded-xl overflow-hidden border border-slate-200 shadow-sm relative group min-h-[300px]">
+                    <img
+                      src={system.intermediate_image}
+                      alt="System Detail"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+
+                    {/* Admin Overlay */}
+                    {isAdmin && token && (
+                      <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                        <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 hover:bg-white/20">
+                          <ImageIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/jpeg,image/png,image/webp"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              handleUpload(file, "intermediate-image");
+                              e.target.value = "";
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Benefits / Functions */}
+            {system.systemFunctions && system.systemFunctions.length > 0 && (
+              <section className="space-y-6">
+                <h2 className="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-4">
+                  Key Benefits
+                </h2>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {system.systemFunctions.map((func, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-3 p-4 bg-white border border-slate-100 rounded-lg shadow-sm"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-slate-700">{func}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* How It Works */}
+            {system.howItWorks && (
+              <section className="space-y-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Bell className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    How It Works
+                  </h2>
+                </div>
+                <p className="text-slate-600 italic mb-4">
+                  "{system.howItWorks.description}"
+                </p>
+                {system.howItWorks.keyPoints && (
+                  <ol className="space-y-3">
+                    {system.howItWorks.keyPoints.map((point, i) => (
+                      <li key={i} className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-blue-600 text-white rounded-full text-sm font-bold">
+                          {i + 1}
+                        </span>
+                        <span className="text-slate-700 pt-0.5">{point}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
+            )}
+          </div>
+
+          {/* RIGHT COLUMN: Sidebar (1/3 width) */}
+          <div className="lg:col-span-1 space-y-8">
+            {/* Front Image Card (Admin Editable) */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="relative h-48 bg-slate-100">
+                {system.front_image ? (
+                  <img
+                    src={system.front_image}
+                    alt="Front"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-400">
+                    No Image
+                  </div>
+                )}
+                {/* Quick Edit Hint */}
+                {isAdmin && token && (
+                  <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                    Use Admin Toolbar to edit
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold text-slate-900">System View</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Main visual representation.
+                </p>
+              </div>
+            </div>
+
+            {/* Use Cases */}
+            {system.useCases && system.useCases.length > 0 && (
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-blue-600" /> Ideal For
+                </h3>
+                <ul className="space-y-3">
+                  {system.useCases.map((useCase, i) => (
+                    <li
+                      key={i}
+                      className="text-sm text-slate-600 flex items-start gap-2"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></span>
+                      {useCase}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* System Posts (Activity Feed) */}
+            <SystemPostsComponent
+              name={system.name}
+              posts={posts}
+              loading={postsLoading}
+              error={postsError}
+            />
+
+            {/* Testimonials */}
+            <TestimonialsComponent
+              systemId={public_id}
+              systemName={system.name}
+            />
+
+            {/* About Harristech Sidebar Widget */}
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-6 text-white shadow-lg">
+              <h3 className="font-bold text-lg mb-2">About Harristech</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                We specialize in security and automation across East Africa.
+                Robust enterprise solutions that are simple enough for
+                homeowners.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
       <EditSystemModelComponent
         system={system}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveDetails}
       />
-
-      {/* Add Post Modal */}
       <AddPost
         systemId={system.public_id}
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
         onSave={handleSavePost}
+      />
+      <RequestQuoteComponent
+        isOpen={isRequestModalOpen}
+        onClose={() => setIsRequestModalOpen(false)}
+        systemName={system.name}
+        systemsList={systemsList}
       />
     </div>
   );

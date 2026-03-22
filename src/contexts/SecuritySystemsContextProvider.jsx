@@ -45,7 +45,7 @@ export const SecuritySystemsContextProvider = ({ children }) => {
       ],
     },
     {
-      id: 2,
+      id: 2, 
       name: "Biometric",
       elements: [
         { id: 1, name: "Access Control" },
@@ -81,18 +81,33 @@ export const SecuritySystemsContextProvider = ({ children }) => {
     },
   ]);
 
-  const fetchNamesUrl = () => {
+   const fetchNamesUrl = () => {
     axiosClient
       .get("/systems/get-systems-names")
       .then((res) => {
         const formatted = res.data.map((category, index) => ({
           id: index + 1,
           name: category.name,
-          elements: category.elements.map((el) => ({
-            id: el.id,
-            url: el.url,
-            name: el.name,
-          })),
+          elements: category.elements
+            .sort((a, b) => {
+              // SAFETY CHECK: Convert to lowercase string, default to empty string
+              const aType = (a.type || '').toLowerCase();
+              const bType = (b.type || '').toLowerCase();
+
+              // DEBUG: Check console to see what types are actually coming back
+              // console.log('Comparing:', aType, bType);
+
+              if (aType === 'perimeter' && bType !== 'perimeter') return -1;
+              if (aType !== 'perimeter' && bType === 'perimeter') return 1;
+              return 0;
+            })
+            .map((el) => ({
+              id: el.id,
+              url: el.url,
+              name: el.name,
+              shortDescription: el.shortDescription,
+              front_image: el.front_image,
+            })),
         }));
 
         setProductsAndSolutions(formatted);
@@ -101,7 +116,6 @@ export const SecuritySystemsContextProvider = ({ children }) => {
         console.error("Error fetching systems:", err);
       });
   };
-
   return (
     <StateContext.Provider
       value={{
