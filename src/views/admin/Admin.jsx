@@ -13,7 +13,6 @@ const Admin = () => {
   if (!token && !isAdmin) {
     return <Navigate to="/" />;
   }
-  
 
   const handleSyncData = () => {
     setLoading(true);
@@ -25,7 +24,7 @@ const Admin = () => {
       .then((res) => {
         if (res.data.hasData) {
           setMessage(
-            "⚠️ Data already exists in the systems table. Nothing added."
+            "⚠️ Data already exists in the systems table. Nothing added.",
           );
           setLoading(false);
         } else {
@@ -36,6 +35,7 @@ const Admin = () => {
           entries.forEach(([key, item]) => {
             const payload = {
               name: item.name,
+              public_url: item.publicUrl,
               type: item.type,
               shortDescription: item.shortDescription,
               front_image: null,
@@ -53,7 +53,7 @@ const Admin = () => {
                 completed++;
                 if (completed === entries.length) {
                   setMessage(
-                    "✅ All services have been successfully uploaded."
+                    "✅ All services have been successfully uploaded.",
                   );
                   setLoading(false);
                 }

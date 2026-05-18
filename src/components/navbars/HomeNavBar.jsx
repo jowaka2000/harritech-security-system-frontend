@@ -4,15 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
 import { useSecuritySystemsContextProvider } from "../../contexts/SecuritySystemsContextProvider";
 import axiosClient from "../../axiosClient";
-import icon from "../../assets/alarm.jpg";
+import logo from '../../assets/harilogo.png'
 
 // Import Lucide Icons
 import { 
   Menu, 
   X, 
   Phone, 
-  User, 
-  ShieldCheck, 
   ChevronDown,
   LogOut,
   FilePlus 
@@ -57,8 +55,8 @@ const HomeNavBar = () => {
         
         {/* Left: Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-            <img src={icon} alt="Harristech Logo" className="w-7 h-7 text-white" />
+          <div className="w-10 h-10 rounded-xl from-green-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <img src={logo} alt="Harristech Logo" className=" rounded-full text-white" />
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-700">
@@ -89,9 +87,9 @@ const HomeNavBar = () => {
                 <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
                   <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[220px] overflow-hidden">
                     {(product.elements ?? []).map((el) => {
-                      const path = el?.url?.startsWith("/") 
-                        ? el.url 
-                        : `/security-systems/${el?.url ?? ""}`;
+                      const path = el?.public_url?.startsWith("/") 
+                        ? el.public_url 
+                        : `/security-systems/${el?.public_url ?? ""}`;
                       const isActive = currentPath === path;
 
                       return (
@@ -133,9 +131,9 @@ const HomeNavBar = () => {
                           {pname}
                         </div>
                         {(p.elements ?? []).map((el) => {
-                          const path = el?.url?.startsWith("/") 
-                            ? el.url 
-                            : `/security-systems/${el?.url ?? ""}`;
+                          const path = el?.public_url?.startsWith("/") 
+                            ? el.public_url 
+                            : `/security-systems/${el?.public_url ?? ""}`;
                           const isActive = currentPath === path;
 
                           return (
@@ -279,9 +277,9 @@ const HomeNavBar = () => {
                         className="overflow-hidden pl-4 space-y-1"
                       >
                         {(product.elements ?? []).map((el) => {
-                          const path = el?.url?.startsWith("/") 
-                            ? el.url 
-                            : `/security-systems/${el?.url ?? ""}`;
+                          const path = el?.public_url?.startsWith("/") 
+                            ? el.public_url 
+                            : `/security-systems/${el?.public_url ?? ""}`;
                             
                           return (
                             <Link

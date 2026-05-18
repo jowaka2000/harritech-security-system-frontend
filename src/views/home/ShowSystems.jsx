@@ -1,41 +1,68 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Loader2,
   Pencil,
   Image as ImageIcon,
-  FilePlus,
   Shield,
   ArrowRight,
   CheckCircle2,
-  Bell,
+  Trash2,
+  MessageCircle,
+  DollarSign,
+  ImageOff,
+  ShoppingCart,
+  X,
+  Upload,
+  Cpu, // Icon for Device
 } from "lucide-react";
 import axiosClient from "../../axiosClient";
 import EditSystemModelComponent from "../../components/show/EditSystemModelComponent";
-import { AddPost } from "../../components/show/AddPost";
-import SystemPostsComponent from "../../components/show/SystemPostsComponent";
 import TestimonialsComponent from "../../components/show/TestimonialsComponent";
 import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
 import RequestQuoteComponent from "../../components/show/RequestQuoteComponent";
+import { motion } from "framer-motion";
+import { useShowSystemHook } from "../../hooks/useShowSystemHook";
 
 const ShowSystems = () => {
-  const { public_id } = useParams();
+  const { public_url } = useParams();
   const { token, isAdmin } = useAuthContextProvider();
 
-  // State
-  const [system, setSystem] = useState({ top_image: null, name: "" });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [topImage, setTopImage] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-  const [posts, setPosts] = useState([]);
-  const [postsLoading, setPostsLoading] = useState(false);
-  const [postsError, setPostsError] = useState(null);
+  const {
+    // System
+    setLoading,
+    setError,
+    setTopImage,
+    setUploading,
+    setIsModalOpen,
+    system,
+    setSystem,
+    isModalOpen,
+    isRequestModalOpen,
+    setIsRequestModalOpen,
+    loading,
+    topImage,
+    uploading,
 
-  // Mock systems list for the quote dropdown
+    // Products
+    products,
+    productsLoading,
+    productsError,
+    fetchProducts,
+    createProduct,
+    deleteProduct,
+
+    // Product Form
+    isProductModalOpen,
+    setIsProductModalOpen,
+    productForm,
+    setProductForm,
+    imagePreview,
+    setImagePreview,
+    setImageFile,
+    resetProductForm,
+  } = useShowSystemHook();
+
   const systemsList = [
     "IP Cameras Installation",
     "DVRs and NVRs",
@@ -46,35 +73,34 @@ const ShowSystems = () => {
     "Fire Alarms",
   ];
 
-  // --- Fetch Data ---
+  // --- Fetch System Data ---
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     setLoading(true);
     axiosClient
-      .get(`/systems/${public_id}`)
+      .get(`/systems/${public_url}`)
       .then((res) => {
         setSystem(res.data);
         setTopImage(res.data.top_image);
+
+        // Once system is loaded, fetch its products
+        if (res.data.id) {
+          fetchProducts(res.data.id);
+        }
       })
       .catch((err) => {
         console.error(err);
         setError("Failed to load system.");
       })
       .finally(() => setLoading(false));
-  }, [public_id]);
 
-  useEffect(() => {
-    setPostsLoading(true);
-    axiosClient
-      .get(`/posts/index/${public_id}`)
-      .then(({ data }) => setPosts(data))
-      .catch(() => setPostsError("Failed to load posts"))
-      .finally(() => setPostsLoading(false));
-  }, [public_id]);
+    // eslint-disable-next-line
+  }, [public_url]);
 
   // --- Handlers ---
-  // Generic Upload Helper
+
+  // Generic Upload Helper (System Images)
   const handleUpload = (file, type) => {
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -83,33 +109,19 @@ const ShowSystems = () => {
     }
 
     const formData = new FormData();
-
-    // Convert to snake_case by default (top-image -> top_image)
     let formKey = type.replace("-", "_");
-
-    // SPECIAL FIX: The backend validation for Front Image expects 'front-image' (hyphen)
-    // whereas Top Image expects 'top_image' (underscore).
-    if (type === "front-image") {
-      formKey = "front-image";
-    }
-
-    // ADDED: Intermediate Image also likely expects a hyphen in validation
-    if (type === "intermediate-image") {
-      formKey = "intermediate-image";
-    }
+    if (type === "front-image") formKey = "front-image";
+    if (type === "intermediate-image") formKey = "intermediate-image";
 
     formData.append(formKey, file);
     setUploading(true);
 
     axiosClient
-      .post(`/systems/${public_id}/upload-${type}`, formData, {
+      .post(`/systems/${public_url}/upload-${type}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(({ data }) => {
-        // We use 'formKey' to retrieve the response.
-        // If the backend returns the URL using the same key we sent, this works.
         const imageUrl = data[formKey];
-
         if (type === "top-image") setTopImage(imageUrl);
         else if (type === "front-image")
           setSystem((prev) => ({ ...prev, front_image: imageUrl }));
@@ -123,22 +135,9 @@ const ShowSystems = () => {
       .finally(() => setUploading(false));
   };
 
-  const handleSavePost = (formData) => {
-    formData.append("system_id", system.public_id);
-    axiosClient
-      .post(`/posts/create/${system.public_id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then(({ data }) => {
-        setPosts((prev) => [data, ...prev]);
-        setIsPostModalOpen(false);
-      })
-      .catch(console.error);
-  };
-
   const handleSaveDetails = (updatedData) => {
     axiosClient
-      .put(`/systems/update/${system.public_id}`, updatedData)
+      .put(`/systems/update/${public_url}`, updatedData)
       .then(({ data }) => {
         setSystem(data.system);
         setIsModalOpen(false);
@@ -146,7 +145,21 @@ const ShowSystems = () => {
       .catch(() => alert("Failed to update details."));
   };
 
-  // --- Loading / Error States ---
+  // --- Product Form Handlers ---
+  const handleProductInputChange = (e) => {
+    const { name, value } = e.target;
+    setProductForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProductImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+      setImageFile(file); // Store actual file for API
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] bg-slate-50">
@@ -158,21 +171,21 @@ const ShowSystems = () => {
     );
   }
 
-
-  if (error || !system) {
+  if (!system) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] text-red-500">
         <span className="text-xl font-bold mb-2">Oops!</span>
-        <span>{error || "System not found."}</span>
+        <span>{"System not found."}</span>
       </div>
     );
   }
 
+  
+  console.log(system)
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      {/* --- HERO SECTION (Replaced Pink with Slate/Blue) --- */}
+      {/* --- HERO SECTION --- */}
       <section className="bg-slate-900 text-white pt-12 pb-16 relative overflow-hidden">
-        {/* Background Pattern */}
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -183,7 +196,6 @@ const ShowSystems = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-10">
-            {/* Text Content */}
             <div className="md:w-1/2 space-y-6">
               <Link
                 to="/security-systems"
@@ -218,7 +230,6 @@ const ShowSystems = () => {
               </div>
             </div>
 
-            {/* Hero Image */}
             <div className="md:w-1/2 w-full relative group">
               <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
                 <img
@@ -226,15 +237,11 @@ const ShowSystems = () => {
                   alt={system.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-
-                {/* Admin Overlay for Top Image */}
                 {isAdmin && token && (
                   <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                     <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 hover:bg-white/20">
                       <ImageIcon className="w-8 h-8 text-white" />
                     </div>
-
-                    {/* This is the hidden input. Clicking the label (or icon) triggers this. */}
                     <input
                       type="file"
                       className="hidden"
@@ -243,7 +250,7 @@ const ShowSystems = () => {
                         const file = e.target.files[0];
                         if (file) {
                           handleUpload(file, "top-image");
-                          e.target.value = ""; // Reset input value here
+                          e.target.value = "";
                         }
                       }}
                     />
@@ -265,7 +272,6 @@ const ShowSystems = () => {
                 <span>Admin Tools:</span>
               </div>
               <div className="flex flex-wrap gap-3">
-                {/* Edit Details */}
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 text-sm font-medium transition"
@@ -273,7 +279,6 @@ const ShowSystems = () => {
                   <Pencil size={16} /> Edit Details
                 </button>
 
-                {/* Upload Front Image */}
                 <label className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 text-sm font-medium transition cursor-pointer">
                   <ImageIcon size={16} />{" "}
                   {uploading ? "Uploading..." : "Upload Front Image"}
@@ -291,30 +296,11 @@ const ShowSystems = () => {
                   />
                 </label>
 
-                {/* --- NEW: Upload Content Image --- */}
-                <label className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 text-sm font-medium transition cursor-pointer">
-                  <ImageIcon size={16} />{" "}
-                  {uploading ? "Uploading..." : "Upload Content Image"}
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        handleUpload(file, "intermediate-image");
-                        e.target.value = "";
-                      }
-                    }}
-                  />
-                </label>
-
-                {/* Add Post */}
                 <button
-                  onClick={() => setIsPostModalOpen(true)}
+                  onClick={() => setIsProductModalOpen(true)}
                   className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-md hover:bg-green-100 text-sm font-medium transition"
                 >
-                  <FilePlus size={16} /> Add Update
+                  <ShoppingCart size={16} /> Add Product
                 </button>
               </div>
             </div>
@@ -322,54 +308,148 @@ const ShowSystems = () => {
         </div>
       )}
 
-      {/* --- MAIN CONTENT (Sidebar Layout) --- */}
+      {/* --- MAIN CONTENT --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* LEFT COLUMN: Main Content (2/3 width) */}
-          <div className="lg:col-span-2 space-y-10">
-            {/* Description & Overview */}
+          {/* LEFT COLUMN */}
+          <div className="lg:col-span-2 space-y-12">
+            {/* Overview */}
             <section className="space-y-6">
               <h2 className="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-4">
                 Overview
               </h2>
               <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
                 <p className="text-lg">{system.fullDescription}</p>
-
-                {/* Intermediate Image (if exists) */}
-                {system.intermediate_image && (
-                  <div className="my-8 rounded-xl overflow-hidden border border-slate-200 shadow-sm relative group min-h-[300px]">
-                    <img
-                      src={system.intermediate_image}
-                      alt="System Detail"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-
-                    {/* Admin Overlay */}
-                    {isAdmin && token && (
-                      <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                        <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 hover:bg-white/20">
-                          <ImageIcon className="w-8 h-8 text-white" />
-                        </div>
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="image/jpeg,image/png,image/webp"
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              handleUpload(file, "intermediate-image");
-                              e.target.value = "";
-                            }
-                          }}
-                        />
-                      </label>
-                    )}
-                  </div>
-                )}
               </div>
             </section>
 
-            {/* Benefits / Functions */}
+            {/* Products Section */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between border-l-4 border-blue-600 pl-4">
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Available Products
+                </h2>
+                {productsLoading && (
+                  <Loader2 className="animate-spin text-blue-600 w-6 h-6" />
+                )}
+              </div>
+
+              {productsError ? (
+                <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm">
+                  {productsError}
+                </div>
+              ) : products.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                  <ShoppingCart className="w-12 h-12 text-slate-300 mb-3" />
+                  <p className="text-slate-500 font-medium">
+                    No products listed yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {products.map((product, index) => {
+                    // Backend returns 'images' array. We take the first one.
+                    const productImage =
+                      product.images && product.images.length > 0
+                        ? product.images[0]
+                        : null;
+
+                    return (
+                      <motion.div
+                        key={product.public_id || product.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col relative"
+                      >
+                        {/* Admin Actions */}
+                        {isAdmin && token && (
+                          <div className="absolute top-2 right-2 z-10 flex gap-2">
+                            <button
+                              onClick={() =>
+                                console.log(
+                                  "Edit logic here",
+                                  product.public_id,
+                                )
+                              }
+                              className="p-1.5 bg-white/90 text-blue-600 rounded-full shadow-sm hover:bg-blue-50 hover:scale-110 transition"
+                              title="Edit Product"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button
+                              onClick={() => deleteProduct(product.public_id)}
+                              className="p-1.5 bg-white/90 text-red-600 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition"
+                              title="Delete Product"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Image */}
+                        <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
+                          {productImage ? (
+                            <img
+                              src={productImage}
+                              alt={product.name}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center w-full h-full text-slate-300">
+                              <ImageOff className="w-8 h-8 mb-2" />
+                              <span className="text-xs font-medium">
+                                No Image
+                              </span>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-5 flex flex-col flex-1">
+                          <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                            {product.name}
+                          </h3>
+
+                          {/* Backend uses 'description', frontend expects 'shortDes' mapping */}
+                          <p className="text-sm text-slate-500 line-clamp-3 mb-4 flex-1 leading-relaxed">
+                            {product.description || "No description available."}
+                          </p>
+
+                          {/* Price */}
+                          <div className="flex items-center gap-1 mb-4 text-blue-700 font-bold text-xl">
+                            <DollarSign className="w-5 h-5" />
+                            <span>{product.price}</span>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="grid grid-cols-2 gap-2 mt-auto">
+                            <button
+                              onClick={() => setIsRequestModalOpen(true)}
+                              className="flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+                            >
+                              Request Quote
+                            </button>
+                            <a
+                              href={`https://wa.me/254706074540?text=Hello, I am interested in ${product.name}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center justify-center gap-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              WhatsApp
+                            </a>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* Key Benefits */}
             {system.systemFunctions && system.systemFunctions.length > 0 && (
               <section className="space-y-6">
                 <h2 className="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-4">
@@ -388,40 +468,10 @@ const ShowSystems = () => {
                 </ul>
               </section>
             )}
-
-            {/* How It Works */}
-            {system.howItWorks && (
-              <section className="space-y-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Bell className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-900">
-                    How It Works
-                  </h2>
-                </div>
-                <p className="text-slate-600 italic mb-4">
-                  "{system.howItWorks.description}"
-                </p>
-                {system.howItWorks.keyPoints && (
-                  <ol className="space-y-3">
-                    {system.howItWorks.keyPoints.map((point, i) => (
-                      <li key={i} className="flex gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-blue-600 text-white rounded-full text-sm font-bold">
-                          {i + 1}
-                        </span>
-                        <span className="text-slate-700 pt-0.5">{point}</span>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </section>
-            )}
           </div>
 
-          {/* RIGHT COLUMN: Sidebar (1/3 width) */}
+          {/* RIGHT COLUMN: Sidebar */}
           <div className="lg:col-span-1 space-y-8">
-            {/* Front Image Card (Admin Editable) */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="relative h-48 bg-slate-100">
                 {system.front_image ? (
@@ -435,7 +485,6 @@ const ShowSystems = () => {
                     No Image
                   </div>
                 )}
-                {/* Quick Edit Hint */}
                 {isAdmin && token && (
                   <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
                     Use Admin Toolbar to edit
@@ -450,7 +499,6 @@ const ShowSystems = () => {
               </div>
             </div>
 
-            {/* Use Cases */}
             {system.useCases && system.useCases.length > 0 && (
               <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -470,21 +518,11 @@ const ShowSystems = () => {
               </div>
             )}
 
-            {/* System Posts (Activity Feed) */}
-            <SystemPostsComponent
-              name={system.name}
-              posts={posts}
-              loading={postsLoading}
-              error={postsError}
-            />
-
-            {/* Testimonials */}
             <TestimonialsComponent
-              systemId={public_id}
+              systemId={public_url}
               systemName={system.name}
             />
 
-            {/* About Harristech Sidebar Widget */}
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-6 text-white shadow-lg">
               <h3 className="font-bold text-lg mb-2">About Harristech</h3>
               <p className="text-sm text-slate-300 leading-relaxed">
@@ -497,25 +535,175 @@ const ShowSystems = () => {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* --- MODALS --- */}
+
+      {/* Edit System Details Modal (Existing) */}
       <EditSystemModelComponent
         system={system}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveDetails}
       />
-      <AddPost
-        systemId={system.public_id}
-        isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
-        onSave={handleSavePost}
-      />
+
+      {/* Request Quote Modal (Existing) */}
       <RequestQuoteComponent
         isOpen={isRequestModalOpen}
         onClose={() => setIsRequestModalOpen(false)}
         systemName={system.name}
         systemsList={systemsList}
       />
+
+      {/* NEW: Add Product Modal */}
+      {isProductModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900">
+                Add New Product
+              </h3>
+              <button
+                onClick={() => {
+                  setIsProductModalOpen(false);
+                  resetProductForm();
+                }}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body (Form) */}
+            <form onSubmit={createProduct} className="p-6 space-y-4">
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Product Image
+                </label>
+                <div className="relative w-full h-40 border-2 border-dashed border-slate-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer group overflow-hidden">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProductImageChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 group-hover:text-blue-500">
+                      <Upload className="w-8 h-8 mb-2" />
+                      <span className="text-sm font-medium">
+                        Click to upload image
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Product Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  value={productForm.name}
+                  onChange={handleProductInputChange}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  placeholder="e.g. Hikvision Dome Camera"
+                />
+              </div>
+
+              {/* Device (Added to match Backend Schema) */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Device Type
+                </label>
+                <div className="relative">
+                  <Cpu className="absolute left-3 top-2.5 text-slate-500 w-4 h-4" />
+                  <input
+                    type="text"
+                    name="device"
+                    required
+                    value={productForm.device}
+                    onChange={handleProductInputChange}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="e.g. Camera, NVR, Sensor"
+                  />
+                </div>
+              </div>
+
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Price
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-slate-500">
+                    KES
+                  </span>
+                  <input
+                    type="text"
+                    name="price"
+                    required
+                    value={productForm.price}
+                    onChange={handleProductInputChange}
+                    className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="e.g. 4,500"
+                  />
+                </div>
+              </div>
+
+              {/* Description (Mapped from shortDes) */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  required
+                  rows="3"
+                  value={productForm.description}
+                  onChange={handleProductInputChange}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+                  placeholder="Brief description of the product..."
+                ></textarea>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProductModalOpen(false);
+                    resetProductForm();
+                  }}
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition"
+                >
+                  Save Product
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

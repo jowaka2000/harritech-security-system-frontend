@@ -32,78 +32,33 @@ export const SecuritySystemsContextProvider = ({ children }) => {
   const [isSystemGuidance, setIsSystemGuidance] = useState(false);
   const [isAboutUs, setIsAboutUs] = useState(false);
 
-  const [productsAndSolutions, setProductsAndSolutions] = useState([
-    {
-      id: 1,
-      name: "Cameras",
-      elements: [
-        { id: 1, name: "IP Cameras" },
-        { id: 2, name: "DVRs and NVRs" },
-        { id: 3, name: "Analogue HD Cameras" },
-        { id: 4, name: "Vehicle DVRs" },
-        { id: 5, name: "Vehicle Cameras" },
-      ],
-    },
-    {
-      id: 2, 
-      name: "Biometric",
-      elements: [
-        { id: 1, name: "Access Control" },
-        { id: 2, name: "Attendance Systems" },
-        { id: 3, name: "Software and Solutions" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Perimeter",
-      elements: [
-        { id: 1, name: "Electric Fence" },
-        { id: 2, name: "Automatic Gates" },
-      ],
-    },
-    {
-      id: 4,
-      name: "Alarm",
-      elements: [
-        { id: 1, name: "Intruder Alarm Systems" },
-        { id: 2, name: "Fire Alarm Systems" },
-        { id: 3, name: "Fire Doors" },
-      ],
-    },
-    {
-      id: 5,
-      name: "Guidance",
-      elements: [
-        { id: 1, name: "CCTV Installation Guide" },
-        { id: 2, name: "Home Security Systems Setup" },
-        { id: 3, name: "Security Consultancy" },
-      ],
-    },
-  ]);
+  const [productsAndSolutions, setProductsAndSolutions] = useState([]);
 
-   const fetchNamesUrl = () => {
+  const fetchNamesUrl = () => {
     axiosClient
       .get("/systems/get-systems-names")
       .then((res) => {
+       
         const formatted = res.data.map((category, index) => ({
           id: index + 1,
           name: category.name,
           elements: category.elements
             .sort((a, b) => {
               // SAFETY CHECK: Convert to lowercase string, default to empty string
-              const aType = (a.type || '').toLowerCase();
-              const bType = (b.type || '').toLowerCase();
+              const aType = (a.type || "").toLowerCase();
+              const bType = (b.type || "").toLowerCase();
 
               // DEBUG: Check console to see what types are actually coming back
               // console.log('Comparing:', aType, bType);
 
-              if (aType === 'perimeter' && bType !== 'perimeter') return -1;
-              if (aType !== 'perimeter' && bType === 'perimeter') return 1;
+              if (aType === "perimeter" && bType !== "perimeter") return -1;
+              if (aType !== "perimeter" && bType === "perimeter") return 1;
               return 0;
             })
             .map((el) => ({
               id: el.id,
               url: el.url,
+              public_url:el.public_url,
               name: el.name,
               shortDescription: el.shortDescription,
               front_image: el.front_image,

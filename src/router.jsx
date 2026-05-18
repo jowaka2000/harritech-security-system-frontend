@@ -32,7 +32,7 @@ const router = createBrowserRouter([
         element: <Admin />,
       },
       {
-        path: "/security-systems/:public_id",
+        path: "/security-systems/:public_url",
         element: <ShowSystems />,
       },
       {

@@ -14,14 +14,13 @@ const ThirdComponent = () => {
   // State for Backend Products
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
 
   // Helper function to capitalize first letter and lowercase the rest
   const capitalizeFirstLetter = (str) => {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
-
   // Fetch Products from Backend
   useEffect(() => {
     setLoading(true);
@@ -29,11 +28,12 @@ const ThirdComponent = () => {
       .get("/products")
       .then(({ data }) => {
         setProducts(data);
-        setError(null);
+        // console.log(products)
+        // setError(null);
       })
       .catch((err) => {
         console.error("Error fetching products:", err);
-        setError("Failed to load products.");
+        // setError("Failed to load products.");
       })
       .finally(() => {
         setLoading(false);
@@ -67,12 +67,12 @@ const ThirdComponent = () => {
         {/* Dynamic Categories Loop */}
         <div className="space-y-8">
           {productsAndSolutions.map((category, index) => {
-            
             // Format the name here
             const formattedName = capitalizeFirstLetter(category.name);
-            const displayName = category.name === "guidance" 
-              ? formattedName 
-              : `${formattedName} System`;
+            const displayName =
+              category.name === "guidance"
+                ? formattedName
+                : `${formattedName} System`;
 
             return (
               <div key={category.id}>
@@ -100,7 +100,7 @@ const ThirdComponent = () => {
                 )}
 
                 {/* --- NEW: DYNAMIC INSERTIONS BETWEEN CATEGORIES --- */}
-                
+
                 {/* Insertion 1: After 1st Category (Index 0) */}
                 {index === 0 && !loading && products.length > 0 && (
                   <ProductsCarousel
@@ -114,11 +114,8 @@ const ThirdComponent = () => {
 
                 {/* Insertion 3: After 3rd Category (Index 2) */}
                 {index === 2 && !loading && products.length > 6 && (
-                  <FeaturedProductsGrid 
-                    products={products.slice(6, 10)} 
-                  />
+                  <FeaturedProductsGrid products={products.slice(6, 10)} />
                 )}
-                
               </div>
             );
           })}

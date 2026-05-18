@@ -1,10 +1,8 @@
-
 const ServiceDescription = {
-  
-  
   "Automatic Gates": {
     name: "Automatic Gates Installation",
-    type:'perimeter',
+    publicUrl: "automatic-gates",
+    type: "perimeter",
     shortDescription:
       "Automatic gates enhance property security while offering convenience through controlled access.",
     image: { url: "", alt: "" },
@@ -34,10 +32,11 @@ const ServiceDescription = {
       "High-value estates — enhance privacy and property value with automated access.",
     ],
   },
-  
+
   "Electric Fence": {
     name: "Electric Fence Installation",
-    type:'perimeter',
+    publicUrl: "electric-fence",
+    type: "perimeter",
     shortDescription:
       "Electric fences provide an extra layer of defense to secure your property from intruders.",
     image: { url: "electricFence", alt: "Electric Fence" },
@@ -69,12 +68,12 @@ const ServiceDescription = {
     ],
   },
 
-
-  "Ip Cameras": {
-    name: "IP Cameras Installation",
-    type:'cameras',
+  "CCTV Cameras": {
+    name: "CCTV cameras Installation",
+    type: "cameras",
+    publicUrl: "cctv-cameras",
     shortDescription:
-      "HARRISTECH installs IP cameras that deliver high-resolution surveillance with secure remote access from any internet-connected device.",
+      "HARRISTECH installs CCTV cameras that deliver high-resolution surveillance with secure remote access from any internet-connected device.",
     front_image: "",
     top_image: "",
     intermediate_image: "",
@@ -106,153 +105,10 @@ const ServiceDescription = {
     ],
   },
 
-  "Dvrs And Nvrs": {
-    name: "DVRs and NVRs Installation",
-    type:'cameras',
-    shortDescription:
-      "DVRs and NVRs form the core of reliable video recording, ensuring continuous capture and easy playback of surveillance footage.",
-    front_image: "",
-    top_image: "",
-    intermediate_image: "",
-    fullDescription:
-      "Digital Video Recorders (DVRs) and Network Video Recorders (NVRs) are vital components of modern surveillance systems. DVRs connect to analogue cameras, converting and storing their footage digitally, while NVRs record video directly from IP cameras over a network. Both systems provide 24/7 recording, playback, and storage options, with support for multiple channels to handle several cameras simultaneously. They allow users to review historical footage locally or remotely, making them a dependable choice for both residential and enterprise security solutions.",
-    systemFunctions: [
-      "Record and store video from analogue (DVR) or IP cameras (NVR).",
-      "Multi-channel support for handling multiple cameras at once.",
-      "Playback, search, and remote access for reviewing stored footage.",
-    ],
-    howItWorks: {
-      description:
-        "DVRs connect to analogue cameras via coaxial cables, digitizing and storing video locally, while NVRs connect to IP cameras through a network, receiving and recording video streams directly. Both can be paired with hard drives for local storage, or integrated with cloud platforms for hybrid storage solutions. Remote access is enabled through mobile apps or secure web platforms.",
-      keyPoints: [
-        "DVRs convert analogue camera signals into digital video.",
-        "NVRs record streams directly from IP cameras over Ethernet/Wi-Fi.",
-        "Both support local storage with hard drives and optional cloud backup.",
-        "Playback and search functions allow quick access to recorded events.",
-        "Remote access via apps/web for on-the-go monitoring.",
-      ],
-    },
-    useCases: [
-      "Residential setups — store and review footage from home cameras.",
-      "Retail shops — record customer activity and deter theft.",
-      "Office environments — monitor multiple floors or entrances.",
-      "Warehouses & factories — maintain video archives for safety and compliance.",
-      "Public spaces — manage multi-camera surveillance networks.",
-      "Educational institutions — secure campuses with centralized video recording.",
-    ],
-  },
-
-  "Analogue Hd Cameras": {
-    name: "Analogue HD Cameras Installation",
-    type:'cameras',
-    shortDescription:
-      "High-definition analogue cameras provide reliable, cost-effective surveillance with easy integration into existing CCTV setups.",
-    front_image: "",
-    top_image: "",
-    intermediate_image: "",
-    fullDescription:
-      "Analogue HD cameras combine the traditional reliability of CCTV with modern high-definition video quality. These cameras are ideal for upgrading existing analogue infrastructure without replacing cabling, making them a cost-efficient solution for improved surveillance. They deliver clear images, often up to 1080p or higher, and include features such as night vision, motion detection, and weather resistance for outdoor use. Their affordability and straightforward setup make them suitable for both residential and commercial applications.",
-    systemFunctions: [
-      "Deliver HD video using existing coaxial cabling infrastructure.",
-      "Support night vision and motion detection for round-the-clock monitoring.",
-      "Affordable and easy to install or upgrade from older CCTV systems.",
-    ],
-    howItWorks: {
-      description:
-        "Analogue HD cameras transmit high-definition video signals over coaxial cables to a DVR, which converts and stores the footage digitally. They maintain the plug-and-play simplicity of traditional CCTV systems, while offering HD resolution without requiring a complete infrastructure overhaul.",
-      keyPoints: [
-        "Uses coaxial cabling for easy installation and upgrades.",
-        "Connects directly to DVRs for recording and storage.",
-        "Supports HD resolutions up to 1080p and beyond.",
-        "Reliable option for areas with existing analogue CCTV infrastructure.",
-        "Works in both indoor and outdoor environments.",
-      ],
-    },
-    useCases: [
-      "Residential surveillance — upgrade old CCTV to HD without rewiring.",
-      "Retail stores — cost-effective monitoring of entrances and sales floors.",
-      "Parking lots & garages — affordable outdoor surveillance.",
-      "Warehouses & workshops — clear visibility for safety and security.",
-      "Schools & small offices — improve video quality on existing CCTV systems.",
-      "Budget-sensitive projects — HD security without investing in full IP setups.",
-    ],
-  },
-
-  "Vehicle Dvrs": {
-    name: "Vehicle DVRs Installation",
-    type:'cameras',
-    shortDescription:
-      "Vehicle DVRs record every journey, enhancing safety, accountability, and protection for drivers and fleets.",
-    image: { url: "", alt: "" },
-    fullDescription:
-      "Vehicle DVRs are specialized recording systems designed for use in cars, trucks, buses, and other vehicles. They continuously capture real-time footage from multiple connected cameras, often providing 360-degree coverage. Many units include GPS tracking, G-sensors for impact detection, night vision, and 4G/5G connectivity for live monitoring. Ideal for fleet managers and individual drivers, Vehicle DVRs provide valuable evidence during accidents, disputes, or incidents, ensuring accountability and safety on the road.",
-    systemFunctions: [
-      "Continuous multi-channel recording while the vehicle is in use.",
-      "Integrated GPS tracking and route history playback.",
-      "Supports live monitoring via 4G/5G or Wi-Fi.",
-      "Shock/impact detection for accident evidence.",
-    ],
-    howItWorks: {
-      description:
-        "Vehicle DVRs connect to one or more cameras mounted inside and outside the vehicle. Video and audio feeds are recorded to internal storage such as HDDs, SSDs, or SD cards, with optional cloud backup. Built-in GPS provides location tracking, while G-sensors detect sudden impacts and automatically save critical footage. Some systems offer SIM card support for real-time remote monitoring and alerts.",
-      keyPoints: [
-        "Connects to multiple cameras for complete in-vehicle and external coverage.",
-        "Stores video locally on SD card, SSD, or HDD with overwrite protection.",
-        "GPS integration for live location tracking and route playback.",
-        "G-sensor locks recordings during accidents or sudden impacts.",
-        "Optional 4G/5G connectivity for real-time monitoring and alerts.",
-      ],
-    },
-    useCases: [
-      "Fleet management — monitor driver behavior, routes, and vehicle safety.",
-      "Public transport — enhance passenger safety and record incidents.",
-      "Logistics & delivery vehicles — provide proof of delivery and protect drivers.",
-      "Private cars — record trips and secure evidence in case of accidents.",
-      "Taxis & ride-sharing — ensure accountability and passenger protection.",
-      "Law enforcement & emergency vehicles — maintain accountability and event logs.",
-    ],
-  },
-
-  "Vehicle Cameras": {
-    name: "Vehicle Cameras Installation",
-    type:'cameras',
-    shortDescription:
-      "High-quality vehicle cameras deliver reliable video coverage for both private cars and commercial fleets.",
-    image: { url: "", alt: "" },
-    fullDescription:
-      "Vehicle cameras provide high-resolution recording of a vehicle’s surroundings and interior, offering an extra layer of security and evidence. They are commonly paired with Vehicle DVR systems for continuous recording and monitoring. With features such as wide-angle lenses, infrared night vision, waterproof housings, and durable shock-resistant designs, these cameras ensure reliable surveillance in various driving conditions. They are essential for improving driver accountability, preventing theft, and documenting road incidents.",
-    systemFunctions: [
-      "Provides clear video coverage inside and outside vehicles.",
-      "Equipped with wide-angle lenses, infrared night vision, and durable housings.",
-      "Complements Vehicle DVRs for continuous and secure recording.",
-    ],
-    howItWorks: {
-      description:
-        "Vehicle cameras are mounted strategically on dashboards, windshields, or exteriors, and connected to a Vehicle DVR or monitoring system. They capture continuous or event-triggered video, which is stored locally or transmitted via network-enabled DVRs. Cameras are designed to withstand vibration, extreme weather, and low-light conditions, ensuring reliable performance on the road.",
-      keyPoints: [
-        "Mounted on dashboards, windshields, or external vehicle surfaces.",
-        "Connect directly to Vehicle DVRs or in-car monitoring systems.",
-        "Wide-angle and infrared lenses provide visibility in all conditions.",
-        "Built with waterproof and vibration-resistant housings.",
-        "Support continuous or event-based recording modes.",
-      ],
-    },
-    useCases: [
-      "Personal vehicles — deter theft and provide accident evidence.",
-      "Commercial fleets — monitor driver performance and cargo security.",
-      "Public transport — improve passenger safety and prevent misconduct.",
-      "Taxi & ride-hailing services — protect both drivers and passengers.",
-      "Law enforcement vehicles — record field operations and pursuits.",
-      "Heavy trucks & construction vehicles — monitor blind spots and safety zones.",
-    ],
-  },
-
-
-
-  
   "Access Control": {
-    name: "Biometric Access Control",
-    type:'biometric',
+    name: "Biometric Systems",
+    type: "biometric",
+    publicUrl: "biometric-systems",
     shortDescription:
       "Biometric access control systems provide secure, personalized entry to buildings and sensitive areas.",
     image: { url: "", alt: "" },
@@ -287,7 +143,8 @@ const ServiceDescription = {
 
   "Attendance Systems": {
     name: "Attendance Systems Installation",
-    type:'biometric',
+    type: "biometric",
+    publicUrl: "attendance-systems",
     shortDescription:
       "Biometric attendance systems track employee presence with unmatched accuracy and accountability.",
     image: { url: "", alt: "" },
@@ -322,7 +179,9 @@ const ServiceDescription = {
 
   "Software And Solutions": {
     name: "Software and Solutions",
-    type:'biometric',
+    type: "biometric",
+    publicUrl: "software-and-solutions",
+
     shortDescription:
       "Customized biometric software solutions that integrate seamlessly with your security infrastructure.",
     image: { url: "", alt: "" },
@@ -354,12 +213,11 @@ const ServiceDescription = {
     ],
   },
 
-
-
-
   "Intruder Alarm Systems": {
     name: "Intruder Alarm Systems Installation",
-    type:'alarm',
+    type: "alarm",
+    publicUrl: "intruder-alarm-systems",
+
     shortDescription:
       "Advanced intruder alarms detect and alert against unauthorized access, keeping your property secure.",
     image: { url: "", alt: "" },
@@ -392,7 +250,9 @@ const ServiceDescription = {
 
   "Fire Alarm Systems": {
     name: "Fire Alarm System Installation",
-    type:'alarm',
+    type: "alarm",
+    publicUrl: "fire-alarm-systems",
+
     shortDescription:
       "Protect your property from fire hazards with fast-response fire alarm systems.",
     image: { url: "", alt: "" },
@@ -427,7 +287,9 @@ const ServiceDescription = {
 
   "Fire Doors": {
     name: "Fire Doors Installation",
-    type:'alarm',
+    type: "alarm",
+    publicUrl: "fire-doors",
+
     shortDescription:
       "Certified fire doors contain fire spread and ensure safe evacuation during emergencies.",
     image: { url: "", alt: "" },
@@ -462,7 +324,8 @@ const ServiceDescription = {
 
   "Cctv Installation Guide": {
     name: "CCTV Installation Guide",
-    type:'guidance',
+    type: "cameras",
+    publicUrl: "cctv-installation-guide",
     shortDescription:
       "Comprehensive guidance on installing CCTV systems for optimal coverage and security.",
     image: { url: "", alt: "" },
@@ -495,7 +358,9 @@ const ServiceDescription = {
 
   "Home Security Systems Setup": {
     name: "Home Security Systems Setup",
-    type:'guidance',
+    type: "guidance",
+    publicUrl: "home-security-systems-setup",
+
     shortDescription:
       "Step-by-step advice on setting up an integrated home security system for ultimate protection.",
     image: { url: "", alt: "" },
@@ -528,7 +393,9 @@ const ServiceDescription = {
 
   "Security Consultancy": {
     name: "Security Consultancy",
-    type:'guidance',
+    type: "guidance",
+    publicUrl: "security-consultancy",
+
     shortDescription:
       "Professional consultancy services to design and optimize your security system.",
     image: { url: "", alt: "" },

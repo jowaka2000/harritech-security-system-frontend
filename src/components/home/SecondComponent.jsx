@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Shield, Lock, Camera, Fence, ChevronRight, ArrowRight } from "lucide-react";
+import { Shield, Lock, Camera, Fence, ArrowRight } from "lucide-react";
 import gateAndFenceInstallation from "../../assets/home/gate_and_fence_installation.jpg";
 
 const SecondComponent = () => {

@@ -23,7 +23,6 @@ const Footer = () => {
   return (
     <footer className="bg-slate-950 text-slate-300 pt-16 pb-8 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-        
         {/* Brand Column */}
         <div className="space-y-4">
           <div className="flex flex-col leading-none">
@@ -35,8 +34,9 @@ const Footer = () => {
             </span>
           </div>
           <p className="text-sm text-slate-400 leading-relaxed">
-            We provide trusted, advanced, and reliable security solutions tailored 
-            to protect homes, offices, and businesses across the region.
+            We provide trusted, advanced, and reliable security solutions
+            tailored to protect homes, offices, and businesses across the
+            region.
           </p>
         </div>
 
@@ -52,8 +52,13 @@ const Footer = () => {
                 <Phone className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 uppercase font-semibold">Phone</p>
-                <a href="tel:+254706074540" className="text-slate-200 hover:text-white transition-colors">
+                <p className="text-xs text-slate-500 uppercase font-semibold">
+                  Phone
+                </p>
+                <a
+                  href="tel:+254706074540"
+                  className="text-slate-200 hover:text-white transition-colors"
+                >
                   0706 074 540
                 </a>
               </div>
@@ -63,8 +68,13 @@ const Footer = () => {
                 <Mail className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 uppercase font-semibold">Email</p>
-                <a href={`mailto:${email}`} className="text-slate-200 hover:text-white transition-colors">
+                <p className="text-xs text-slate-500 uppercase font-semibold">
+                  Email
+                </p>
+                <a
+                  href={`mailto:${email}`}
+                  className="text-slate-200 hover:text-white transition-colors"
+                >
                   {email}
                 </a>
               </div>
@@ -74,7 +84,9 @@ const Footer = () => {
                 <MapPin className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 uppercase font-semibold">Location</p>
+                <p className="text-xs text-slate-500 uppercase font-semibold">
+                  Location
+                </p>
                 <p className="text-slate-200">Nairobi, Kenya</p>
               </div>
             </li>
@@ -94,9 +106,14 @@ const Footer = () => {
               { icon: Shield, text: "Alarm Systems" },
               { icon: UserCheck, text: "Access Control" },
             ].map((service, index) => (
-              <li key={index} className="flex items-center gap-3 text-sm group cursor-default">
+              <li
+                key={index}
+                className="flex items-center gap-3 text-sm group cursor-default"
+              >
                 <service.icon className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
-                <span className="group-hover:text-white transition-colors">{service.text}</span>
+                <span className="group-hover:text-white transition-colors">
+                  {service.text}
+                </span>
               </li>
             ))}
           </ul>
@@ -129,7 +146,6 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className="max-w-7xl mx-auto px-6 mt-16 border-t border-slate-800 pt-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          
           {/* Social Icons */}
           <div className="flex items-center gap-4">
             {[
@@ -152,7 +168,8 @@ const Footer = () => {
           {/* Copyright */}
           <div className="text-center md:text-right space-y-1">
             <p className="text-sm text-slate-500">
-              © {currentYear} {websiteName} Security Systems. All Rights Reserved.
+              © {currentYear} {websiteName} Security Systems. All Rights
+              Reserved.
             </p>
             <p className="text-xs text-slate-600">
               Developed by{" "}
