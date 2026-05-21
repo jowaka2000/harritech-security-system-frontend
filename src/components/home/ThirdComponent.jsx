@@ -6,6 +6,7 @@ import ProductsCarousel from "./ProductsCarousel";
 import FeaturedProductsGrid from "./FeaturedProductsGrid";
 import RequestServiceComponent from "./RequestServiceComponent";
 import axiosClient from "../../axiosClient";
+import CategoryPostBanner from "./CategoryPostBanner";
 
 const ThirdComponent = () => {
   // Context for Categories
@@ -110,12 +111,17 @@ const ThirdComponent = () => {
                 )}
 
                 {/* Insertion 2: After 2nd Category (Index 1) */}
-                {index === 1 && <RequestServiceComponent />}
+                {index === 1 && (
+                  <CategoryPostBanner category="Perimeter Fence" />
+                )}
+                {index === 3 && <CategoryPostBanner category="CCTV Cameras" />}
 
                 {/* Insertion 3: After 3rd Category (Index 2) */}
                 {index === 2 && !loading && products.length > 6 && (
                   <FeaturedProductsGrid products={products.slice(6, 10)} />
                 )}
+
+                {index === 5 && <RequestServiceComponent />}
               </div>
             );
           })}

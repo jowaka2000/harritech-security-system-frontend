@@ -12,7 +12,7 @@ const SecondComponent = () => {
   ];
 
   return (
-    <section className="bg-slate-900 text-white py-16 lg:py-24 relative overflow-hidden">
+    <section className="bg-slate-900 text-white py-16 lg:py-24 relative overflow-hidden ">
        {/* Subtle Background Pattern */}
       <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
 

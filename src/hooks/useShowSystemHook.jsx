@@ -8,11 +8,12 @@ export const useShowSystemHook = () => {
   const [error, setError] = useState(null);
   const [topImage, setTopImage] = useState("");
   const [uploading, setUploading] = useState(false);
-  
+
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isProductLoading, setIsProductLoading] = useState(false);
 
   // Product State
   const [products, setProducts] = useState([]);
@@ -32,10 +33,10 @@ export const useShowSystemHook = () => {
   // --- Fetch Products for a specific System ---
   const fetchProducts = (systemId) => {
     if (!systemId) return;
-    
+
     setProductsLoading(true);
     setProductsError(null);
-    
+
     axiosClient
       .get(`/products?system_id=${systemId}`)
       .then(({ data }) => {
@@ -52,9 +53,10 @@ export const useShowSystemHook = () => {
   const createProduct = async (e) => {
     e.preventDefault();
 
+    setIsProductLoading(true);
     // 1. Prepare Data
     const formData = new FormData();
-    
+
     // Backend expects a 'payload' JSON string
     const payload = {
       system_id: system.id, // Must be the integer ID
@@ -63,12 +65,12 @@ export const useShowSystemHook = () => {
       price: productForm.price,
       description: productForm.description,
     };
-    
+
     formData.append("payload", JSON.stringify(payload));
 
     // Append images (backend accepts array)
     if (imageFile) {
-      formData.append("images[]", imageFile); 
+      formData.append("images[]", imageFile);
     }
 
     try {
@@ -80,13 +82,15 @@ export const useShowSystemHook = () => {
       // 3. Update Local State (Optimistic UI)
       // The backend returns the created product with images array
       setProducts((prev) => [data.product, ...prev]);
-      
+
       // 4. Reset & Close
       setIsProductModalOpen(false);
       resetProductForm();
+      setIsProductLoading(false);
     } catch (err) {
       console.error(err);
       alert("Failed to create product. Check console for errors.");
+      setIsProductLoading(false);
     }
   };
 
@@ -124,7 +128,7 @@ export const useShowSystemHook = () => {
     setTopImage,
     uploading,
     setUploading,
-    
+
     // Modals
     isModalOpen,
     setIsModalOpen,
@@ -132,6 +136,7 @@ export const useShowSystemHook = () => {
     setIsRequestModalOpen,
     isProductModalOpen,
     setIsProductModalOpen,
+    isProductLoading,
 
     // Products Data
     products,
@@ -140,7 +145,7 @@ export const useShowSystemHook = () => {
     setProductsLoading,
     productsError,
     setProductsError,
-    
+
     // Product Actions
     fetchProducts,
     createProduct,

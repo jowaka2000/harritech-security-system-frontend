@@ -1,45 +1,67 @@
 import React, { useReducer, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import axiosClient from "../../axiosClient";
 import { useAuthContextProvider } from "../../contexts/AuthContextProvider";
-import { Upload, X, Image as ImageIcon, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Upload,
+  X,
+  Image as ImageIcon,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 // --- Reducer Logic ---
 const reducer = (state, action) => {
   switch (action.type) {
     case "CATEGORY_ON_CHANGE":
+      // Populate suggestions based on category (Optional: kept if you still want categories)
       let suggestions = [];
-      // Populate suggestions based on category
       if (action.payload === "Cameras") {
-        suggestions = ["IP Cameras", "DVRs and NVRs", "Analogue HD Cameras", "Vehicle DVRs", "Vehicle Cameras", "PTZ Cameras"];
+        suggestions = [
+          "IP Cameras",
+          "DVRs and NVRs",
+          "Analogue HD Cameras",
+          "Vehicle DVRs",
+        ];
       } else if (action.payload === "Biometric Systems") {
-        suggestions = ["Access Control", "Attendance Systems", "Fingerprint Scanners", "Face Recognition Terminals"];
+        suggestions = [
+          "Access Control",
+          "Attendance Systems",
+          "Fingerprint Scanners",
+        ];
       } else if (action.payload === "Perimeter Security") {
-        suggestions = ["Electric Fence", "Automatic Gates", "Razor Wire", "Motion Sensors"];
+        suggestions = [
+          "Electric Fence",
+          "Automatic Gates",
+          "Razor Wire",
+          "Motion Sensors",
+        ];
       } else if (action.payload === "Alarm Systems") {
-        suggestions = ["Intruder Alarm Systems", "Fire Alarm Systems", "Fire Doors", "Smoke Detectors"];
+        suggestions = [
+          "Intruder Alarm Systems",
+          "Fire Alarm Systems",
+          "Smoke Detectors",
+        ];
       } else if (action.payload === "Other") {
-        suggestions = []; // No suggestions if "Other" is selected
+        suggestions = [];
       }
 
       return {
         ...state,
         category: action.payload,
-        deviceSuggestions: suggestions,
-        device: "", // Reset device when category changes
+        deviceSuggestions: suggestions, // Keeping state name for consistency, or rename to categorySuggestions
+        title: "", // Reset title when category changes? Optional.
       };
 
-    case "DEVICE_ON_CHANGE":
-      return { ...state, device: action.payload };
-
-    case "PRICE_ON_CHANGE":
-      return { ...state, price: action.payload };
+    case "TITLE_ON_CHANGE":
+      return { ...state, title: action.payload };
 
     case "DESCRIPTION_ON_CHANGE":
       return { ...state, description: action.payload };
 
     case "IMAGE_ON_CHANGE":
-      return { ...state, images: action.payload };
+      // Handle Single Image for Banner
+      return { ...state, image: action.payload };
 
     case "RESET_FORM":
       return defaultValues;
@@ -51,11 +73,10 @@ const reducer = (state, action) => {
 
 const defaultValues = {
   category: "",
-  deviceSuggestions: [],
-  device: "",
-  price: "",
+  deviceSuggestions: [], // Keeping field to avoid breaking reducer if referenced elsewhere, though not used in UI
+  title: "",
   description: "",
-  images: [],
+  image: null, // Single file object
 };
 
 const CreatePosts = () => {
@@ -67,14 +88,18 @@ const CreatePosts = () => {
 
   const { token, isAdmin } = useAuthContextProvider();
 
+  if (!token && !isAdmin) {
+    return <Navigate to="/" />;
+  }
+
   // --- Validation Logic ---
   const validateForm = () => {
     const newErrors = {};
     if (!state.category) newErrors.category = "Category is required.";
-    if (!state.device.trim()) newErrors.device = "Device name is required.";
-    if (!state.price || Number(state.price) <= 0) newErrors.price = "A valid price is required.";
-    if (!state.description.trim()) newErrors.description = "Description is required.";
-    if (!state.images || state.images.length === 0) newErrors.images = "At least one image is required.";
+    if (!state.title.trim()) newErrors.title = "Post title is required.";
+    if (!state.description.trim())
+      newErrors.description = "Description is required.";
+    if (!state.image) newErrors.image = "A banner image is required.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -88,55 +113,57 @@ const CreatePosts = () => {
 
     setIsSubmitting(true);
 
-    const payload = {
-      category: state.category,
-      device: state.device,
-      price: state.price,
-      description: state.description,
-    };
-
     const formData = new FormData();
-    state.images.forEach((file) => {
-      formData.append("images[]", file);
-    });
-    formData.append("payload", JSON.stringify(payload));
+
+    // 1. Append text fields directly (No JSON wrapping)
+    formData.append("title", state.title);
+    formData.append("category", state.category);
+    formData.append("description", state.description);
+
+    // 2. Append the image file
+    if (state.image) {
+      formData.append("image", state.image);
+    }
 
     axiosClient
-      .post("/products/create", formData, {
+      .post("/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((response) => {
-        alert("🎉 Product successfully added!");
+        alert("🎉 Post created successfully!");
         dispatch({ type: "RESET_FORM" });
         if (imageRef.current) imageRef.current.value = null;
-        // navigate("/products"); // Or wherever you want to redirect
+        // navigate("/posts");
       })
       .catch((error) => {
-        console.error("❌ Error creating product:", error);
-        alert("Failed to create product. Try again.");
+        console.error("❌ Error creating post:", error);
+        // Handle validation errors from backend if needed
+        if (error.response && error.response.status === 422) {
+          setErrors(error.response.data.errors);
+        } else {
+          alert("Failed to create post. Try again.");
+        }
       })
       .finally(() => {
         setIsSubmitting(false);
       });
   };
 
-  // --- Helper: Filtered Suggestions ---
-  const filteredSuggestions = state.deviceSuggestions.filter((s) =>
-    s.toLowerCase().includes(state.device.toLowerCase())
-  );
-
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-800">Add New Product</h1>
-            <p className="text-slate-500">Fill in the details below to list a new security product.</p>
+            <h1 className="text-3xl font-extrabold text-slate-800">
+              Create New Post
+            </h1>
+            <p className="text-slate-500">
+              Share updates, news, or banner information.
+            </p>
           </div>
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition"
           >
             Cancel
@@ -144,11 +171,13 @@ const CreatePosts = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* --- LEFT COLUMN: FORM --- */}
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8">
-            <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
-              
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              encType="multipart/form-data"
+            >
               {/* Category */}
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -156,70 +185,55 @@ const CreatePosts = () => {
                 </label>
                 <select
                   value={state.category}
-                  onChange={(e) => dispatch({ type: "CATEGORY_ON_CHANGE", payload: e.target.value })}
-                  className={`w-full border rounded-xl px-4 py-3 bg-slate-50 focus:outline-none transition-colors ${errors.category ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'}`}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "CATEGORY_ON_CHANGE",
+                      payload: e.target.value,
+                    })
+                  }
+                  className={`w-full border rounded-xl px-4 py-3 bg-slate-50 focus:outline-none transition-colors ${errors.category ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"}`}
                   required
                 >
-                  <option value="" disabled>Select a category...</option>
-                  <option value="Cameras">Cameras</option>
+                  <option value="" disabled>
+                    Select a category...
+                  </option>
+                  <option value="Automatic Gate">Automatic Gate</option>
+                  <option value="Perimeter Fence">Perimeter Fence</option>
+                  <option value="CCTV Cameras">CCTV Cameras</option>
                   <option value="Biometric Systems">Biometric Systems</option>
-                  <option value="Perimeter Security">Perimeter Security</option>
                   <option value="Alarm Systems">Alarm Systems</option>
                   <option value="Other">Other</option>
                 </select>
-                {errors.category && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.category}</p>}
-              </div>
-
-              {/* Device (Text Input with Suggestions) */}
-              <div className="relative z-20">
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Device Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={state.device}
-                  onChange={(e) => dispatch({ type: "DEVICE_ON_CHANGE", payload: e.target.value })}
-                  placeholder="Type to search or enter device name..."
-                  className={`w-full border rounded-xl px-4 py-3 bg-slate-50 focus:outline-none transition-colors ${errors.device ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'}`}
-                  required
-                  autoComplete="off"
-                />
-                {errors.device && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.device}</p>}
-
-                {/* Suggestions Dropdown */}
-                {state.device && filteredSuggestions.length > 0 && (
-                  <div className="absolute top-[3.4rem] left-0 w-full bg-white border border-slate-200 rounded-xl shadow-xl mt-1 max-h-40 overflow-y-auto">
-                    {filteredSuggestions.map((suggestion, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => dispatch({ type: "DEVICE_ON_CHANGE", payload: suggestion })}
-                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-slate-700 hover:text-blue-700 border-b border-slate-50 last:border-0"
-                      >
-                        {suggestion}
-                      </div>
-                    ))}
-                  </div>
+                {errors.category && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.category}
+                  </p>
                 )}
               </div>
 
-              {/* Price */}
+              {/* Title */}
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Price (KES) <span className="text-red-500">*</span>
+                  Post Title <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-3 text-slate-400 font-medium">KES</span>
-                  <input
-                    type="number"
-                    value={state.price}
-                    onChange={(e) => dispatch({ type: "PRICE_ON_CHANGE", payload: e.target.value })}
-                    placeholder="0.00"
-                    className={`w-full border rounded-xl pl-14 pr-4 py-3 bg-slate-50 focus:outline-none transition-colors ${errors.price ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'}`}
-                    required
-                    min="1"
-                  />
-                </div>
-                {errors.price && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.price}</p>}
+                <input
+                  type="text"
+                  value={state.title}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "TITLE_ON_CHANGE",
+                      payload: e.target.value,
+                    })
+                  }
+                  placeholder="Enter a catchy title for the post..."
+                  className={`w-full border rounded-xl px-4 py-3 bg-slate-50 focus:outline-none transition-colors ${errors.title ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"}`}
+                  required
+                />
+                {errors.title && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.title}
+                  </p>
+                )}
               </div>
 
               {/* Description */}
@@ -229,35 +243,57 @@ const CreatePosts = () => {
                 </label>
                 <textarea
                   value={state.description}
-                  onChange={(e) => dispatch({ type: "DESCRIPTION_ON_CHANGE", payload: e.target.value })}
-                  placeholder="Describe the product features, specifications, and usage..."
-                  className={`w-full border rounded-xl px-4 py-3 bg-slate-50 focus:outline-none transition-colors resize-none h-32 ${errors.description ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'}`}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "DESCRIPTION_ON_CHANGE",
+                      payload: e.target.value,
+                    })
+                  }
+                  placeholder="Write the main content of your post here..."
+                  className={`w-full border rounded-xl px-4 py-3 bg-slate-50 focus:outline-none transition-colors resize-none h-40 ${errors.description ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"}`}
                   required
                 ></textarea>
-                {errors.description && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.description}</p>}
+                {errors.description && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.description}
+                  </p>
+                )}
               </div>
 
-              {/* Image Upload */}
+              {/* Image Upload (Single Banner) */}
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Product Images <span className="text-red-500">*</span>
+                  Banner Image <span className="text-red-500">*</span>
                 </label>
-                <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors bg-slate-50 cursor-pointer relative">
+                <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors bg-slate-50 cursor-pointer relative group">
                   <input
                     ref={imageRef}
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
-                    multiple
-                    onChange={(e) => dispatch({ type: "IMAGE_ON_CHANGE", payload: Array.from(e.target.files) })}
+                    // Removed 'multiple' attribute
+                    onChange={(e) => {
+                      // Handle single file
+                      const file = e.target.files[0];
+                      if (file)
+                        dispatch({ type: "IMAGE_ON_CHANGE", payload: file });
+                    }}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <Upload className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-600 font-medium">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">PNG, JPG up to 5MB</p>
+                  <div className="group-hover:scale-105 transition-transform">
+                    <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                    <p className="text-base text-slate-600 font-medium">
+                      Click to upload banner image
+                    </p>
+                    <p className="text-sm text-slate-400 mt-1">
+                      Recommended: Wide aspect ratio (1920px width)
+                    </p>
+                  </div>
                 </div>
-                {errors.images && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.images}</p>}
+                {errors.image && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.image}
+                  </p>
+                )}
               </div>
 
               {/* Submit Button */}
@@ -267,10 +303,10 @@ const CreatePosts = () => {
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
-                  <>Submitting...</>
+                  <>Publishing Post...</>
                 ) : (
                   <>
-                    <CheckCircle2 size={20} /> Create Product
+                    <CheckCircle2 size={20} /> Create Post
                   </>
                 )}
               </button>
@@ -282,45 +318,52 @@ const CreatePosts = () => {
             <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-blue-500" />
-                Image Preview
+                Banner Preview
               </h3>
-              
-              {state.images.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3">
-                  {state.images.map((file, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`preview-${index}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                           const newImages = state.images.filter((_, i) => i !== index);
-                           dispatch({ type: "IMAGE_ON_CHANGE", payload: newImages });
-                        }}
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
+
+              {/* Single Image Preview */}
+              {state.image ? (
+                <div className="relative w-full rounded-xl overflow-hidden border border-slate-200 shadow-sm group">
+                  <img
+                    src={URL.createObjectURL(state.image)}
+                    alt="Banner Preview"
+                    className="w-full h-auto object-cover max-h-64"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch({ type: "IMAGE_ON_CHANGE", payload: null });
+                      if (imageRef.current) imageRef.current.value = "";
+                    }}
+                    className="absolute top-2 right-2 bg-red-500/90 text-white p-1.5 rounded-full hover:bg-red-600 transition shadow-sm"
+                    title="Remove image"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
               ) : (
-                <div className="h-40 bg-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200">
-                  <ImageIcon size={32} className="mb-2 opacity-50" />
-                  <span className="text-sm">No images selected</span>
+                <div className="w-full h-48 bg-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200">
+                  <ImageIcon size={40} className="mb-2 opacity-50" />
+                  <span className="text-sm font-medium">
+                    No banner selected
+                  </span>
                 </div>
               )}
             </div>
 
             <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
-              <h4 className="font-bold text-blue-900 mb-2">💡 Tips</h4>
+              <h4 className="font-bold text-blue-900 mb-2">💡 Posting Tips</h4>
               <ul className="text-sm text-blue-800 space-y-2 list-disc pl-4">
-                <li>Choose "Other" if your device category isn't listed.</li>
-                <li>High-quality images increase sales visibility.</li>
-                <li>Include specific model numbers in the description.</li>
+                <li>
+                  Use high-quality horizontal images for best banner results.
+                </li>
+                <li>
+                  The title should be catchy and relevant to the category.
+                </li>
+                <li>
+                  Posts will be visible to visitors based on the selected
+                  category.
+                </li>
               </ul>
             </div>
           </div>

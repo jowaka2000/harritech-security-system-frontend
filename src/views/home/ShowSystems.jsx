@@ -14,7 +14,7 @@ import {
   ShoppingCart,
   X,
   Upload,
-  Cpu, // Icon for Device
+  Cpu,
 } from "lucide-react";
 import axiosClient from "../../axiosClient";
 import EditSystemModelComponent from "../../components/show/EditSystemModelComponent";
@@ -51,6 +51,7 @@ const ShowSystems = () => {
     fetchProducts,
     createProduct,
     deleteProduct,
+    isProductLoading,
 
     // Product Form
     isProductModalOpen,
@@ -180,8 +181,6 @@ const ShowSystems = () => {
     );
   }
 
-  
-  console.log(system)
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       {/* --- HERO SECTION --- */}
@@ -346,9 +345,9 @@ const ShowSystems = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                // Grid adjusted to 3 columns on large screens, reduced padding
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {products.map((product, index) => {
-                    // Backend returns 'images' array. We take the first one.
                     const productImage =
                       product.images && product.images.length > 0
                         ? product.images[0]
@@ -388,7 +387,7 @@ const ShowSystems = () => {
                         )}
 
                         {/* Image */}
-                        <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
+                        <div className="relative w-full h-48 bg-slate-100 overflow-hidden rounded-t-2xl">
                           {productImage ? (
                             <img
                               src={productImage}
@@ -406,28 +405,27 @@ const ShowSystems = () => {
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
                         </div>
 
-                        {/* Content */}
-                        <div className="p-5 flex flex-col flex-1">
+                        {/* Content - Reduced Padding from p-5 to p-3 */}
+                        <div className="p-3 flex flex-col flex-1">
                           <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                             {product.name}
                           </h3>
 
-                          {/* Backend uses 'description', frontend expects 'shortDes' mapping */}
-                          <p className="text-sm text-slate-500 line-clamp-3 mb-4 flex-1 leading-relaxed">
+                          <p className="text-sm text-slate-500 line-clamp-3 mb-3 flex-1 leading-relaxed">
                             {product.description || "No description available."}
                           </p>
 
                           {/* Price */}
-                          <div className="flex items-center gap-1 mb-4 text-blue-700 font-bold text-xl">
-                            <DollarSign className="w-5 h-5" />
+                          <div className="flex items-center gap-1 mb-3 text-blue-700 font-bold text-lg">
+                            <DollarSign className="w-4 h-4" />
                             <span>{product.price}</span>
                           </div>
 
-                          {/* Actions */}
-                          <div className="grid grid-cols-2 gap-2 mt-auto">
+                          {/* Actions - Stacked on large screens, side-by-side on mobile */}
+                          <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2 mt-auto">
                             <button
                               onClick={() => setIsRequestModalOpen(true)}
-                              className="flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+                              className="flex items-center justify-center gap-1 px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
                             >
                               Request Quote
                             </button>
@@ -435,7 +433,7 @@ const ShowSystems = () => {
                               href={`https://wa.me/254706074540?text=Hello, I am interested in ${product.name}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="flex items-center justify-center gap-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+                              className="flex items-center justify-center gap-1 px-2 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
                             >
                               <MessageCircle className="w-4 h-4" />
                               WhatsApp
@@ -553,156 +551,165 @@ const ShowSystems = () => {
         systemsList={systemsList}
       />
 
-      {/* NEW: Add Product Modal */}
+      {/* NEW: Add Product Modal - Fixed Layout with Scroll */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">
-                Add New Product
-              </h3>
-              <button
-                onClick={() => {
-                  setIsProductModalOpen(false);
-                  resetProductForm();
-                }}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition"
-              >
-                <X size={20} />
-              </button>
-            </div>
+     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col"
+  >
+    {/* Header - Reduced Padding */}
+    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 flex-shrink-0">
+      <h3 className="text-lg font-bold text-slate-900">Add New Product</h3>
+      <button
+        onClick={() => {
+          setIsProductModalOpen(false);
+          resetProductForm();
+        }}
+        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition"
+      >
+        <X size={18} />
+      </button>
+    </div>
 
-            {/* Modal Body (Form) */}
-            <form onSubmit={createProduct} className="p-6 space-y-4">
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Product Image
-                </label>
-                <div className="relative w-full h-40 border-2 border-dashed border-slate-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer group overflow-hidden">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProductImageChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
+    {/* Form */}
+    <form
+      onSubmit={createProduct}
+      className="flex flex-col flex-1 overflow-hidden"
+    >
+      {/* Scrollable Area - Reduced Padding and Gaps */}
+      <div className="p-4 space-y-3 overflow-y-auto flex-1">
+        
+        {/* Image Upload - Reduced Height */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Product Image
+          </label>
+          <div className="relative w-full h-32 border-2 border-dashed border-slate-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer group overflow-hidden">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleProductImageChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
 
-                  {imagePreview ? (
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-400 group-hover:text-blue-500">
-                      <Upload className="w-8 h-8 mb-2" />
-                      <span className="text-sm font-medium">
-                        Click to upload image
-                      </span>
-                    </div>
-                  )}
-                </div>
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 group-hover:text-blue-500">
+                <Upload className="w-6 h-6 mb-1" />
+                <span className="text-xs font-medium">Click to upload</span>
               </div>
-
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  value={productForm.name}
-                  onChange={handleProductInputChange}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                  placeholder="e.g. Hikvision Dome Camera"
-                />
-              </div>
-
-              {/* Device (Added to match Backend Schema) */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Device Type
-                </label>
-                <div className="relative">
-                  <Cpu className="absolute left-3 top-2.5 text-slate-500 w-4 h-4" />
-                  <input
-                    type="text"
-                    name="device"
-                    required
-                    value={productForm.device}
-                    onChange={handleProductInputChange}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                    placeholder="e.g. Camera, NVR, Sensor"
-                  />
-                </div>
-              </div>
-
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-500">
-                    KES
-                  </span>
-                  <input
-                    type="text"
-                    name="price"
-                    required
-                    value={productForm.price}
-                    onChange={handleProductInputChange}
-                    className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                    placeholder="e.g. 4,500"
-                  />
-                </div>
-              </div>
-
-              {/* Description (Mapped from shortDes) */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  required
-                  rows="3"
-                  value={productForm.description}
-                  onChange={handleProductInputChange}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
-                  placeholder="Brief description of the product..."
-                ></textarea>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProductModalOpen(false);
-                    resetProductForm();
-                  }}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition"
-                >
-                  Save Product
-                </button>
-              </div>
-            </form>
-          </motion.div>
+            )}
+          </div>
         </div>
+
+        {/* Name - Reduced Input Padding */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Product Name
+          </label>
+          <input
+            type="text"
+            name="name"
+            required
+            value={productForm.name}
+            onChange={handleProductInputChange}
+            className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            placeholder="e.g. Hikvision Dome Camera"
+          />
+        </div>
+
+        {/* Device - Reduced Input Padding & Icon Positioning */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Device Type
+          </label>
+          <div className="relative">
+            <Cpu className="absolute left-3 top-2 text-slate-500 w-4 h-4" />
+            <input
+              type="text"
+              name="device"
+              required
+              value={productForm.device}
+              onChange={handleProductInputChange}
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="e.g. Camera, NVR, Sensor"
+            />
+          </div>
+        </div>
+
+        {/* Price - Reduced Input Padding & Icon Positioning */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Price
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-2 text-slate-500 text-xs">KES</span>
+            <input
+              type="text"
+              name="price"
+              required
+              value={productForm.price}
+              onChange={handleProductInputChange}
+              className="w-full pl-10 pr-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="e.g. 4,500"
+            />
+          </div>
+        </div>
+
+        {/* Description - Reduced Rows */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Description
+          </label>
+          <textarea
+            name="description"
+            required
+            rows="2"
+            value={productForm.description}
+            onChange={handleProductInputChange}
+            className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+            placeholder="Brief description..."
+          ></textarea>
+        </div>
+      </div>
+
+      {/* Footer Buttons */}
+      <div className="flex justify-end gap-3 p-4 border-t border-slate-100 bg-slate-50 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => {
+            setIsProductModalOpen(false);
+            resetProductForm();
+          }}
+          className="px-4 py-1.5 text-sm text-slate-600 hover:bg-slate-200 rounded-lg font-medium transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isProductLoading}
+          className="flex items-center gap-2 px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {isProductLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Product"
+          )}
+        </button>
+      </div>
+    </form>
+  </motion.div>
+</div>
       )}
     </div>
   );
