@@ -4,21 +4,46 @@ import ProductCard from "./ProductCard";
 
 const ProductsCarousel = ({ products, title }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemsPerSlide, setItemsPerSlide] = useState(1);
 
-  // Auto-slide every 4 seconds
+  // Detect screen size
+  useEffect(() => {
+    const updateItemsPerSlide = () => {
+      if (window.innerWidth >= 1024) {
+        setItemsPerSlide(4); // Desktop
+      } else if (window.innerWidth >= 640) {
+        setItemsPerSlide(2); // Tablet
+      } else {
+        setItemsPerSlide(1); // Mobile
+      }
+    };
+
+    updateItemsPerSlide();
+    window.addEventListener("resize", updateItemsPerSlide);
+
+    return () => window.removeEventListener("resize", updateItemsPerSlide);
+  }, []);
+
+  // Group products into slides
+  const slides = [];
+  for (let i = 0; i < products.length; i += itemsPerSlide) {
+    slides.push(products.slice(i, i + itemsPerSlide));
+  }
+
+  // Auto-slide
   useEffect(() => {
     const interval = setInterval(() => {
-      nextSlide();
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [products.length]);
+  }, [slides.length]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % products.length);
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   if (!products || products.length === 0) return null;
@@ -32,50 +57,53 @@ const ProductsCarousel = ({ products, title }) => {
             <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900">
               {title}
             </h3>
-            <p className="text-slate-500 mt-1">Top selections from our catalog</p>
+            <p className="text-slate-500 mt-1">
+              Top selections from our catalog
+            </p>
           </div>
-          
+
           {/* Controls */}
           <div className="flex gap-2">
             <button
               onClick={prevSlide}
-              className="p-3 bg-white border border-slate-200 rounded-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors shadow-sm"
+              className="p-3 bg-white border rounded-full"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={nextSlide}
-              className="p-3 bg-white border border-slate-200 rounded-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors shadow-sm"
+              className="p-3 bg-white border rounded-full"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Carousel Track */}
+        {/* Carousel */}
         <div className="overflow-hidden">
           <div
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
-            {products.map((product, index) => (
+            {slides.map((slide, index) => (
               <div key={index} className="w-full flex-shrink-0 px-2">
-                {/* On mobile: 1 card, Tablet: 2 cards, Desktop: 4 cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <ProductCard product={product} />
+                  {slide.map((product, i) => (
+                    <ProductCard key={i} product={product} />
+                  ))}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Dots Indicator */}
+        {/* Dots */}
         <div className="flex justify-center mt-6 gap-2">
-          {products.map((_, idx) => (
+          {slides.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full ${
                 currentIndex === idx ? "w-8 bg-blue-600" : "w-2 bg-slate-300"
               }`}
             />

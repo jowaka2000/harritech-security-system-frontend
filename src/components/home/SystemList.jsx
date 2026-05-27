@@ -6,14 +6,13 @@ const SystemList = ({ systems }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {systems.map((system) => {
-        const { id, name, public_url, front_image, shortDes } = system;
-
+        const { id, name, public_url, front_image, shortDescription } = system;
         return (
           <Link
             to={`/security-systems/${public_url}`}
             key={id}
             className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden"
-          > 
+          >
             {/* Image Container */}
             <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
               {front_image ? (
@@ -40,7 +39,7 @@ const SystemList = ({ systems }) => {
               </h3>
 
               <p className="text-sm text-slate-500 line-clamp-3 mb-4 flex-1 leading-relaxed">
-                {shortDes ||
+                {shortDescription ||
                   "No description available for this system."}
               </p>
 

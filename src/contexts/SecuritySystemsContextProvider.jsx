@@ -33,37 +33,34 @@ export const SecuritySystemsContextProvider = ({ children }) => {
   const [isAboutUs, setIsAboutUs] = useState(false);
 
   const [productsAndSolutions, setProductsAndSolutions] = useState([]);
-
   const fetchNamesUrl = () => {
     axiosClient
       .get("/systems/get-systems-names")
       .then((res) => {
-       
-        const formatted = res.data.map((category, index) => ({
-          id: index + 1,
-          name: category.name,
-          elements: category.elements
-            .sort((a, b) => {
-              // SAFETY CHECK: Convert to lowercase string, default to empty string
-              const aType = (a.type || "").toLowerCase();
-              const bType = (b.type || "").toLowerCase();
 
-              // DEBUG: Check console to see what types are actually coming back
-              // console.log('Comparing:', aType, bType);
+        const order = {
+          perimeter: 1,
+          cameras: 2,
+        };
 
-              if (aType === "perimeter" && bType !== "perimeter") return -1;
-              if (aType !== "perimeter" && bType === "perimeter") return 1;
-              return 0;
-            })
-            .map((el) => ({
+        const formatted = res.data
+          .sort((a, b) => {
+            const aOrder = order[a.name?.toLowerCase()] || 99;
+            const bOrder = order[b.name?.toLowerCase()] || 99;
+            return aOrder - bOrder;
+          })
+          .map((category, index) => ({
+            id: index + 1,
+            name: category.name,
+            elements: category.elements.map((el) => ({
               id: el.id,
               url: el.url,
-              public_url:el.public_url,
+              public_url: el.public_url,
               name: el.name,
               shortDescription: el.shortDescription,
               front_image: el.front_image,
             })),
-        }));
+          }));
 
         setProductsAndSolutions(formatted);
       })

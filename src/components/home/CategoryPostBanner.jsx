@@ -10,6 +10,7 @@ const CategoryPostBanner = ({ category }) => {
   
   const { token, isAdmin } = useAuthContextProvider();
 
+
   // --- Fetch Post by Category ---
   useEffect(() => {
     const fetchPost = async () => {

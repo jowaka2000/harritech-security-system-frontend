@@ -417,8 +417,7 @@ const ShowSystems = () => {
 
                           {/* Price */}
                           <div className="flex items-center gap-1 mb-3 text-blue-700 font-bold text-lg">
-                            <DollarSign className="w-4 h-4" />
-                            <span>{product.price}</span>
+                            <span>KSH. {product.price}</span>
                           </div>
 
                           {/* Actions - Stacked on large screens, side-by-side on mobile */}
